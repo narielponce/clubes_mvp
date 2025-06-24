@@ -10,6 +10,7 @@ from .models import PerfilUsuario
 from .forms import UsuarioForm, PerfilUsuarioForm
 from django.db.models import Count
 from django.db.models import Q
+from .decorators import verificar_rol
 
 def is_admin(user):
     return user.groups.filter(name='Administrador').exists()
@@ -32,19 +33,58 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
-    if request.user.groups.filter(name='Administrador').exists():
-        return render(request, 'usuarios/dash_admin.html', {'rol': 'Administrador'})
-    elif request.user.groups.filter(name='Coordinador').exists():
-        return render(request, 'usuarios/dash_coordinador.html', {'rol': 'Coordinador'})
-    elif request.user.groups.filter(name='Profesor').exists():
-        return render(request, 'usuarios/dash_profesor.html', {'rol': 'Profesor'})
-    elif request.user.groups.filter(name='Tesoreria').exists():
-        return render(request, 'usuarios/dash_tesorero.html', {'rol': 'Tesoreria'})
-    elif request.user.groups.filter(name='Comision').exists():
-        return render(request, 'usuarios/dash_comision.html', {'rol': 'Comision'})
+    # Obtener el perfil del usuario
+    try:
+        perfil = request.user.perfil
+    except PerfilUsuario.DoesNotExist:
+        return render(request, 'usuarios/dashboard.html', {'rol': 'Sin Perfil'})
+
+    # Verificar roles de grupo
+    grupos = request.user.groups.values_list('name', flat=True)
+    
+    # Verificar si es socio
+    es_socio = hasattr(perfil, 'socio')
+    
+    # Determinar el dashboard a mostrar
+    if 'Administrador' in grupos:
+        template = 'usuarios/dash_admin.html'
+        rol = 'Administrador'
+    elif 'Coordinador' in grupos:
+        template = 'usuarios/dash_coordinador.html'
+        rol = 'Coordinador'
+    elif 'Profesor' in grupos:
+        template = 'usuarios/dash_profesor.html'
+        rol = 'Profesor'
+    elif 'Tesoreria' in grupos:
+        template = 'usuarios/dash_tesorero.html'
+        rol = 'Tesoreria'
+    elif 'Comision' in grupos:
+        template = 'usuarios/dash_comision.html'
+        rol = 'Comision'
     else:
+        # Si no tiene rol de grupo pero es socio, mostrar dashboard de socio
+        if es_socio:
+            return redirect('socios:area')
+        template = 'usuarios/dashboard.html'
         rol = 'Sin Rol Asignado'
-    return render(request, 'usuarios/dashboard.html', {'rol': rol})
+
+    # Si es socio y no tiene otros roles, redirigir a su área de socio
+    if es_socio and not grupos:
+        return redirect('socios:area')
+
+    return render(request, template, {
+        'rol': rol,
+        'es_socio': es_socio,
+        'perfil': perfil,
+        'socio': perfil.socio if es_socio else None
+    })
+
+    return render(request, template, {
+        'rol': rol,
+        'es_socio': es_socio,
+        'perfil': perfil,
+        'socio': perfil.socio if es_socio else None
+    })
 
 # Vistas para gestión de usuarios
 @login_required

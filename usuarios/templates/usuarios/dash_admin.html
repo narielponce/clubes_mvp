@@ -3,35 +3,36 @@
 {% block sidebar_menu %}
 <h2 class="title is-5 p-3">Administrador</h2>
 <ul class="menu-list p-2">
-  <li><a href="{% url 'dashboard' %}" class="is-active">Inicio</a></li>
-  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
-  <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
-  <li><a href="#">Finanzas</a></li>
-  <li><a href="#">Socios</a></li>
-  <li><a href="#">Disciplinas</a></li>
-  <li><a href="#">Deportistas</a></li>
-  <li><a href="#">Entrenamientos</a></li>
-  <li><a href="#">Eventos</a></li>
-  <li><a href="#">Comunicación</a></li>
-  <li><a href="#">Reportes</a></li>
-  <li><a href="#">Documentación</a></li>
+    <li><a href="{% url 'dashboard' %}" class="is-active">Inicio</a></li>
+    <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
+    <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
+    <li><a href="{% url 'socios:lista_socios' %}">Socios</a></li>
+    <li><a href="#">Disciplinas</a></li>
+    <li><a href="#">Deportistas</a></li>
+    <li><a href="#">Finanzas</a></li>
+    <li><a href="#">Entrenamientos</a></li>
+    <li><a href="#">Eventos</a></li>
+    <li><a href="#">Comunicación</a></li>
+    <li><a href="#">Reportes</a></li>
+    <li><a href="#">Documentación</a></li>
 </ul>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h1 class="title">Panel de Administración</h1>
-    
+
     <!-- Mensajes de éxito/error -->
     {% if messages %}
-        {% for message in messages %}
-            <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
-                <button class="delete"></button>
-                {{ message }}
-            </div>
-        {% endfor %}
+    {% for message in messages %}
+    <div
+        class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
+        <button class="delete"></button>
+        {{ message }}
+    </div>
+    {% endfor %}
     {% endif %}
-    
+
     <div class="columns is-multiline">
         <div class="column is-3">
             <div class="box has-text-centered">
@@ -140,18 +141,18 @@
 </div>
 
 <!-- Font Awesome para iconos -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-<!-- Script para cerrar notificaciones -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Cerrar notificaciones al hacer clic en el botón de cerrar
-    var deleteButtons = document.querySelectorAll('.notification .delete');
-    deleteButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            this.parentNode.remove();
+    <!-- Script para cerrar notificaciones -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cerrar notificaciones al hacer clic en el botón de cerrar
+            var deleteButtons = document.querySelectorAll('.notification .delete');
+            deleteButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    this.parentNode.remove();
+                });
+            });
         });
-    });
-});
-</script>
-{% endblock %}
+    </script>
+    {% endblock %}

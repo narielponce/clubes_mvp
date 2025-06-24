@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+<h2 class="title is-5 p-3">Administrador</h2>
+<ul class="menu-list p-2">
+  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
+  <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
+  <li><a href="{% url 'socios:lista_socios' %}" class ="is-active">Socios</a></li>
+  <li><a href="#">Disciplinas</a></li>
+  <li><a href="#">Deportistas</a></li>
+  <li><a href="#">Finanzas</a></li>
+  <li><a href="#">Entrenamientos</a></li>
+  <li><a href="#">Eventos</a></li>
+  <li><a href="#">Comunicación</a></li>
+  <li><a href="#">Reportes</a></li>
+  <li><a href="#">Documentación</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Gestión de Socios</h1>
+    
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
+                <button class="delete"></button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="columns is-mobile">
+        <div class="column">
+            <a href="{% url 'socios:nuevo_socio' %}" class="button is-primary">
+                <span class="icon is-small"><i class="fas fa-plus"></i></span>
+                <span>Nuevo Socio</span>
+            </a>
+        </div>
+        <div class="column has-text-right">
+            <div class="field has-addons">
+                <div class="control">
+                    <input class="input" type="text" placeholder="Buscar...">
+                </div>
+                <div class="control">
+                    <button class="button">
+                        <span class="icon is-small"><i class="fas fa-search"></i></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Tipo de Socio</th>
+                <th>Estado</th>
+                <th>Fecha de Afiliación</th>
+                <th>Tiempo como Socio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for socio in socios %}
+            <tr>
+                <td>{{ socio.perfil_usuario.usuario.get_full_name }}</td>
+                <td>{{ socio.tipo_socio.get_nombre_display }}</td>
+                <td>
+                    <span class="tag {% if socio.esta_activo %}is-success{% else %}is-danger{% endif %}">
+                        {{ socio.get_estado_display }}
+                    </span>
+                </td>
+                <td>{{ socio.fecha_afiliacion|date:"d/m/Y" }}</td>
+                <td>{{ socio.tiempo_socio }}</td>
+                <td>
+                    <div class="buttons">
+                        <a href="{% url 'socios:detalles_socio' socio.pk %}" class="button is-small is-info">
+                            <span class="icon is-small"><i class="fas fa-info-circle"></i></span>
+                        </a>
+                        <a href="{% url 'socios:editar_socio' socio.pk %}" class="button is-small is-warning">
+                            <span class="icon is-small"><i class="fas fa-edit"></i></span>
+                        </a>
+                        <a href="{% url 'socios:eliminar_socio' socio.pk %}" class="button is-small is-danger" onclick="return confirm('¿Estás seguro de eliminar este socio?')">
+                            <span class="icon is-small"><i class="fas fa-trash"></i></span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="has-text-centered">No hay socios registrados</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

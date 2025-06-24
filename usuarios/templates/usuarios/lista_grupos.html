@@ -3,18 +3,18 @@
 {% block sidebar_menu %}
 <h2 class="title is-5 p-3">Administrador</h2>
 <ul class="menu-list p-2">
-  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
-  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
-  <li><a href="{% url 'lista_grupos' %}" class="is-active">Grupos</a></li>
-  <li><a href="#">Finanzas</a></li>
-  <li><a href="#">Socios</a></li>
-  <li><a href="#">Disciplinas</a></li>
-  <li><a href="#">Deportistas</a></li>
-  <li><a href="#">Entrenamientos</a></li>
-  <li><a href="#">Eventos</a></li>
-  <li><a href="#">Comunicación</a></li>
-  <li><a href="#">Reportes</a></li>
-  <li><a href="#">Documentación</a></li>
+    <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+    <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
+    <li><a href="{% url 'lista_grupos' %}" class="is-active">Grupos</a></li>
+    <li><a href="{% url 'socios:lista_socios' %}">Socios</a></li>
+    <li><a href="#">Disciplinas</a></li>
+    <li><a href="#">Deportistas</a></li>
+    <li><a href="#">Finanzas</a></li>
+    <li><a href="#">Entrenamientos</a></li>
+    <li><a href="#">Eventos</a></li>
+    <li><a href="#">Comunicación</a></li>
+    <li><a href="#">Reportes</a></li>
+    <li><a href="#">Documentación</a></li>
 </ul>
 {% endblock %}
 

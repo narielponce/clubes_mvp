@@ -7,13 +7,32 @@
   <li><a href="#">Finanzas</a></li>
   <li><a href="#">Socios</a></li>
   <li><a href="#">Documentos</a></li>
+  {% if es_socio %}
+  <li><a href="{% url 'socios:area' %}">Área de Socio</a></li>
+  {% endif %}
 </ul>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h1 class="title">Panel de Tesorero</h1>
-    <div class="columns is-multiline">
+    {% if socio %}
+    <div class="notification is-link is-light">
+        <p class="title is-6">Información de Socio</p>
+        <ul>
+            <li><strong>Tipo de Socio:</strong> {{ socio.tipo_socio.get_nombre_display }}</li>
+            <li><strong>Estado:</strong> 
+                <span class="tag {% if socio.esta_activo %}is-success{% else %}is-danger{% endif %}">
+                    {{ socio.get_estado_display }}
+                </span>
+            </li>
+            <li><strong>Fecha de Afiliación:</strong> {{ socio.fecha_afiliacion|date:"d/m/Y" }}</li>
+            <li><strong>Tiempo como Socio:</strong> {{ socio.tiempo_socio }}</li>
+        </ul>
+        <a href="{% url 'socios:area' %}" class="button is-primary">Ver Área de Socio</a>
+    </div>
+    {% endif %}
+    <!-- <div class="columns is-multiline">
         <div class="column is-3">
             <div class="box has-text-centered">
                 <p class="heading">Gestión deportiva</p>
@@ -38,6 +57,6 @@
                 <p class="title">+$2300</p>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 {% endblock %}

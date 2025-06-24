@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+{{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Eliminar Socio</h1>
+    
+    <div class="notification is-warning">
+        <button class="delete"></button>
+        <p>¿Estás seguro que deseas eliminar el socio {{ socio.usuario.get_full_name }}?</p>
+        <p>Esta acción no se puede deshacer.</p>
+    </div>
+
+    <form method="post" class="has-text-centered">
+        {% csrf_token %}
+        <div class="field is-grouped">
+            <div class="control">
+                <button type="submit" class="button is-danger">Eliminar</button>
+            </div>
+            <div class="control">
+                <a href="{% url 'socios:lista_socios' %}" class="button is-light">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

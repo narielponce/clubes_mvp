@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+{{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Detalles del Socio</h1>
+    
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
+                <button class="delete"></button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="columns is-multiline">
+        <div class="column is-6">
+            <div class="box">
+                <h2 class="title is-4">Información Personal</h2>
+                <div class="content">
+                    <p><strong>Nombre:</strong> {{ socio.usuario.get_full_name }}</p>
+                    <p><strong>Correo:</strong> {{ socio.usuario.email }}</p>
+                    <p><strong>Tipo de Socio:</strong> {{ socio.tipo_socio }}</p>
+                    <p><strong>Estado:</strong> 
+                        <span class="tag {% if socio.esta_activo %}is-success{% else %}is-danger{% endif %}">
+                            {{ socio.get_estado_display }}
+                        </span>
+                    </p>
+                    <p><strong>Fecha de Afiliación:</strong> {{ socio.fecha_afiliacion }}</p>
+                    <p><strong>Tiempo como Socio:</strong> {{ socio.tiempo_socio }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="column is-6">
+            <div class="box">
+                <h2 class="title is-4">Observaciones</h2>
+                <div class="content">
+                    {% if socio.observaciones %}
+                        {{ socio.observaciones|linebreaks }}
+                    {% else %}
+                        <p>No hay observaciones registradas</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="field is-grouped">
+        <div class="control">
+            <a href="{% url 'socios:editar_socio' socio.pk %}" class="button is-warning">Editar</a>
+        </div>
+        <div class="control">
+            <a href="{% url 'socios:lista_socios' %}" class="button is-light">Volver</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
