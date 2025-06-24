@@ -1,0 +1,194 @@
+/* Estilos personalizados para la aplicación de validaciones */
+
+/* Mejoras generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Estilos para el menú lateral */
+.menu-list {
+    background-color: #f5f5f5;
+    border-radius: 6px;
+}
+
+.menu-list a {
+    color: #4a4a4a;
+    padding: 0.5rem 1rem;
+    display: block;
+    text-decoration: none;
+    border-radius: 4px;
+    margin: 0.25rem 0;
+    transition: all 0.2s ease;
+}
+
+.menu-list a:hover {
+    background-color: #e8e8e8;
+    color: #3273dc;
+}
+
+.menu-list a.is-active {
+    background-color: #3273dc;
+    color: white;
+}
+
+/* Estilos para las tarjetas de estadísticas */
+.box.has-text-centered {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.box.has-text-centered:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Estilos para las tablas */
+.table-container {
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #363636;
+}
+
+/* Estilos para los botones */
+.button {
+    transition: all 0.2s ease;
+}
+
+.button:hover {
+    transform: translateY(-1px);
+}
+
+/* Estilos para las notificaciones */
+.notification {
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+/* Estilos para los formularios */
+.field .label {
+    font-weight: 600;
+    color: #363636;
+}
+
+.input, .select select, .textarea {
+    border-radius: 4px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus, .select select:focus, .textarea:focus {
+    border-color: #3273dc;
+    box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
+}
+
+/* Estilos para las etiquetas de estado */
+.tag.is-success {
+    background-color: #48c774;
+    color: white;
+}
+
+.tag.is-danger {
+    background-color: #f14668;
+    color: white;
+}
+
+.tag.is-warning {
+    background-color: #ffdd57;
+    color: #4a4a4a;
+}
+
+.tag.is-info {
+    background-color: #3298dc;
+    color: white;
+}
+
+/* Estilos para el navbar */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Estilos para los iconos */
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilos para las acciones en las tablas */
+.buttons.are-small .button {
+    margin-right: 0.25rem;
+}
+
+/* Estilos para los filtros */
+.box form {
+    background-color: #fafafa;
+    border: 1px solid #e8e8e8;
+}
+
+/* Estilos para la información adicional */
+.box .content ul {
+    margin-top: 0.5rem;
+}
+
+.box .content li {
+    margin-bottom: 0.25rem;
+}
+
+/* Estilos para los enlaces */
+a {
+    color: #3273dc;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #2366d1;
+    text-decoration: underline;
+}
+
+/* Estilos para el contenido principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Estilos para el sidebar */
+aside.column.is-2 {
+    background-color: #f5f5f5;
+    min-height: calc(100vh - 60px);
+    padding: 1rem 0;
+}
+
+/* Estilos para el contenido principal */
+main.column.is-10 {
+    padding: 1rem;
+}
+
+/* Estilos para las estadísticas en el dashboard */
+.columns.is-multiline .column .box {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Estilos para los botones de acción rápida */
+.buttons .button {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Estilos para las notificaciones de mensajes */
+.notification .delete {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.notification .delete:hover {
+    background-color: rgba(0,0,0,0.1);
+} 

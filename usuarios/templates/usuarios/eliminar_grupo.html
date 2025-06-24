@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+<h2 class="title is-5 p-3">Administrador</h2>
+<ul class="menu-list p-2">
+  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
+  <li><a href="{% url 'lista_grupos' %}" class="is-active">Grupos</a></li>
+  <li><a href="#">Finanzas</a></li>
+  <li><a href="#">Socios</a></li>
+  <li><a href="#">Disciplinas</a></li>
+  <li><a href="#">Deportistas</a></li>
+  <li><a href="#">Entrenamientos</a></li>
+  <li><a href="#">Eventos</a></li>
+  <li><a href="#">Comunicación</a></li>
+  <li><a href="#">Reportes</a></li>
+  <li><a href="#">Documentación</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">Eliminar Grupo</h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'lista_grupos' %}" class="button is-light">
+                    <span class="icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span>Volver</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div class="content">
+            <h3 class="title is-4 has-text-danger">
+                <span class="icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </span>
+                Confirmar Eliminación
+            </h3>
+            
+            <p class="has-text-grey-dark">
+                ¿Estás seguro de que deseas eliminar el grupo <strong>{{ grupo.name }}</strong>?
+            </p>
+            
+            <div class="notification is-warning is-light">
+                <p><strong>Información del grupo a eliminar:</strong></p>
+                <ul>
+                    <li><strong>Nombre:</strong> {{ grupo.name }}</li>
+                    <li><strong>Usuarios asignados:</strong> {{ grupo.user_count }}</li>
+                    {% if grupo.user_count > 0 %}
+                        <li><strong>Lista de usuarios:</strong>
+                            <ul>
+                                {% for usuario in grupo.user.all %}
+                                    <li>{{ usuario.username }} ({{ usuario.first_name }} {{ usuario.last_name }})</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            {% if grupo.user_count > 0 %}
+                <div class="notification is-warning">
+                    <p>El grupo tiene {{ grupo.user_count }} usuario(s) asignado(s). Primero debe:</p>
+                    <ul>
+                        <li>Remover todos los usuarios del grupo, o</li>
+                        <li>Asignar los usuarios a otros grupos</li>
+                    </ul>
+                </div>
+            {% else %}
+                <div class="notification is-info">
+                    <p>Este grupo no tiene usuarios asignados y puede ser eliminado de forma segura.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="field is-grouped is-grouped-right">
+                <div class="control">
+                    <a href="{% url 'lista_grupos' %}" class="button is-light">
+                        <span class="icon">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <span>Cancelar</span>
+                    </a>
+                </div>
+                {% if not grupo.user_count > 0 %}
+                <div class="control">
+                    <button type="submit" class="button is-danger">
+                        <span class="icon">
+                            <i class="fas fa-trash"></i>
+                        </span>
+                        <span>Eliminar Grupo</span>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 

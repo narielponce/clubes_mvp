@@ -3,8 +3,9 @@
 {% block sidebar_menu %}
 <h2 class="title is-5 p-3">Administrador</h2>
 <ul class="menu-list p-2">
-  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
-  <li><a href="#">Usuarios</a></li>
+  <li><a href="{% url 'dashboard' %}" class="is-active">Inicio</a></li>
+  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
+  <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
   <li><a href="#">Finanzas</a></li>
   <li><a href="#">Socios</a></li>
   <li><a href="#">Disciplinas</a></li>
@@ -13,13 +14,24 @@
   <li><a href="#">Eventos</a></li>
   <li><a href="#">Comunicación</a></li>
   <li><a href="#">Reportes</a></li>
-  <li><a href="#">Dcoumentación</a></li>
+  <li><a href="#">Documentación</a></li>
 </ul>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     <h1 class="title">Panel de Administración</h1>
+    
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
+                <button class="delete"></button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
     <div class="columns is-multiline">
         <div class="column is-3">
             <div class="box has-text-centered">
@@ -46,5 +58,100 @@
             </div>
         </div>
     </div>
+
+    <!-- Acciones rápidas -->
+    <!--<div class="columns is-multiline mt-4">
+        <div class="column is-6">
+            <div class="box">
+                <h3 class="title is-5">Gestión de Usuarios</h3>
+                <div class="content">
+                    <p>Administra usuarios del sistema, sus perfiles y asignaciones de grupos.</p>
+                    <div class="buttons">
+                        <a href="{% url 'lista_usuarios' %}" class="button is-info is-light">
+                            <span class="icon">
+                                <i class="fas fa-users"></i>
+                            </span>
+                            <span>Ver Usuarios</span>
+                        </a>
+                        <a href="{% url 'crear_usuario' %}" class="button is-primary">
+                            <span class="icon">
+                                <i class="fas fa-user-plus"></i>
+                            </span>
+                            <span>Nuevo Usuario</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="column is-6">
+            <div class="box">
+                <h3 class="title is-5">Gestión de Grupos</h3>
+                <div class="content">
+                    <p>Gestiona grupos de usuarios y sus permisos en el sistema.</p>
+                    <div class="buttons">
+                        <a href="{% url 'lista_grupos' %}" class="button is-info is-light">
+                            <span class="icon">
+                                <i class="fas fa-layer-group"></i>
+                            </span>
+                            <span>Ver Grupos</span>
+                        </a>
+                        <a href="{% url 'crear_grupo' %}" class="button is-primary">
+                            <span class="icon">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                            <span>Nuevo Grupo</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+
+    <!-- Información del sistema -->
+    <!--<div class="box mt-4">
+        <h3 class="title is-5">Información del Sistema</h3>
+        <div class="content">
+            <div class="columns">
+                <div class="column is-6">
+                    <h4 class="title is-6">Roles Disponibles</h4>
+                    <ul>
+                        <li><strong>Administrador:</strong> Acceso completo al sistema</li>
+                        <li><strong>Coordinador:</strong> Gestión de coordinación y eventos</li>
+                        <li><strong>Profesor:</strong> Gestión de enseñanza y entrenamientos</li>
+                        <li><strong>Tesoreria:</strong> Gestión financiera y pagos</li>
+                        <li><strong>Comision:</strong> Gestión de comisiones y evaluaciones</li>
+                    </ul>
+                </div>
+                <div class="column is-6">
+                    <h4 class="title is-6">Funcionalidades Principales</h4>
+                    <ul>
+                        <li>✅ Gestión completa de usuarios (CRUD)</li>
+                        <li>✅ Gestión de grupos y permisos</li>
+                        <li>✅ Asignación de usuarios a grupos</li>
+                        <li>✅ Perfiles de usuario extendidos</li>
+                        <li>🔄 Sistema de autenticación</li>
+                        <li>📊 Dashboard administrativo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- Script para cerrar notificaciones -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cerrar notificaciones al hacer clic en el botón de cerrar
+    var deleteButtons = document.querySelectorAll('.notification .delete');
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            this.parentNode.remove();
+        });
+    });
+});
+</script>
 {% endblock %}

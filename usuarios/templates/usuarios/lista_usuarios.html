@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+<h2 class="title is-5 p-3">Administrador</h2>
+<ul class="menu-list p-2">
+  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+  <li><a href="{% url 'lista_usuarios' %}" class="is-active">Usuarios</a></li>
+  <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
+  <li><a href="#">Finanzas</a></li>
+  <li><a href="#">Socios</a></li>
+  <li><a href="#">Disciplinas</a></li>
+  <li><a href="#">Deportistas</a></li>
+  <li><a href="#">Entrenamientos</a></li>
+  <li><a href="#">Eventos</a></li>
+  <li><a href="#">Comunicación</a></li>
+  <li><a href="#">Reportes</a></li>
+  <li><a href="#">Documentación</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">Gestión de Usuarios</h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'crear_usuario' %}" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Nuevo Usuario</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="box">
+        <form method="get" class="columns is-multiline">
+            <div class="column is-3">
+                <div class="field">
+                    <label class="label">Buscar</label>
+                    <div class="control">
+                        <input class="input" type="text" name="busqueda" value="{{ busqueda }}" 
+                               placeholder="Usuario, nombre, email...">
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <div class="field">
+                    <label class="label">Grupo</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="grupo">
+                                <option value="">Todos</option>
+                                {% for grupo in grupos %}
+                                <option value="{{ grupo.name }}" {% if grupo_filtro == grupo.name %}selected{% endif %}>
+                                    {{ grupo.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <div class="field">
+                    <label class="label">Estado</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="estado">
+                                <option value="">Todos</option>
+                                <option value="ACTIVO" {% if estado_filtro == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                                <option value="INACTIVO" {% if estado_filtro == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                                <option value="SUSPENDIDO" {% if estado_filtro == 'SUSPENDIDO' %}selected{% endif %}>Suspendido</option>
+                                <option value="PENDIENTE" {% if estado_filtro == 'PENDIENTE' %}selected{% endif %}>Pendiente de Aprobación</option>
+                                <option value="RETIRADO" {% if estado_filtro == 'RETIRADO' %}selected{% endif %}>Retirado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <div class="field">
+                    <label class="label">&nbsp;</label>
+                    <div class="control">
+                        <button type="submit" class="button is-info is-fullwidth">
+                            <span class="icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <span>Filtrar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <div class="field">
+                    <label class="label">&nbsp;</label>
+                    <div class="control">
+                        <a href="{% url 'lista_usuarios' %}" class="button is-light is-fullwidth">
+                            <span class="icon">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            <span>Limpiar</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="table-container">
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre Completo</th>
+                    <th>Email</th>
+                    <th>Documento</th>
+                    <th>Grupos</th>
+                    <th>Estado</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td>
+                        <strong>{{ usuario.username }}</strong>
+                    </td>
+                    <td>
+                        {{ usuario.first_name }} {{ usuario.last_name }}
+                    </td>
+                    <td>{{ usuario.email }}</td>
+                    <td>
+                        {% if usuario.perfil %}
+                            {{ usuario.perfil.get_tipo_documento_display }}: {{ usuario.perfil.numero_documento }}
+                        {% else %}
+                            <span class="has-text-grey-light">Sin documento</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% for grupo in usuario.groups.all %}
+                            <span class="tag is-info is-small">{{ grupo.name }}</span>
+                        {% empty %}
+                            <span class="has-text-grey-light">Sin grupos</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% if usuario.perfil %}
+                            {% if usuario.perfil.estado_socio == 'ACTIVO' %}
+                                <span class="tag is-success is-small">{{ usuario.perfil.get_estado_socio_display }}</span>
+                            {% elif usuario.perfil.estado_socio == 'INACTIVO' %}
+                                <span class="tag is-danger is-small">{{ usuario.perfil.get_estado_socio_display }}</span>
+                            {% elif usuario.perfil.estado_socio == 'SUSPENDIDO' %}
+                                <span class="tag is-warning is-small">{{ usuario.perfil.get_estado_socio_display }}</span>
+                            {% elif usuario.perfil.estado_socio == 'PENDIENTE' %}
+                                <span class="tag is-info is-small">{{ usuario.perfil.get_estado_socio_display }}</span>
+                            {% else %}
+                                <span class="tag is-light is-small">{{ usuario.perfil.get_estado_socio_display }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="has-text-grey-light">Sin perfil</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if usuario.is_active %}
+                            <span class="tag is-success is-small">Sí</span>
+                        {% else %}
+                            <span class="tag is-danger is-small">No</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="buttons are-small">
+                            <a href="{% url 'editar_usuario' usuario.id %}" class="button is-info is-light">
+                                <span class="icon">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            {% if usuario != request.user %}
+                            <a href="{% url 'eliminar_usuario' usuario.id %}" class="button is-danger is-light">
+                                <span class="icon">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="has-text-centered has-text-grey-light">
+                        No se encontraron usuarios
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="columns is-multiline mt-4">
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Total Usuarios</p>
+                <p class="title">{{ total_usuarios }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Usuarios Activos</p>
+                <p class="title has-text-success">{{ usuarios_activos }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Administradores</p>
+                <p class="title has-text-info">{{ administradores }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Sin Grupos</p>
+                <p class="title has-text-warning">{{ sin_grupos }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 

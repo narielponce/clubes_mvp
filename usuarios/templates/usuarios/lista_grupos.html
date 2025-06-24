@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+<h2 class="title is-5 p-3">Administrador</h2>
+<ul class="menu-list p-2">
+  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
+  <li><a href="{% url 'lista_grupos' %}" class="is-active">Grupos</a></li>
+  <li><a href="#">Finanzas</a></li>
+  <li><a href="#">Socios</a></li>
+  <li><a href="#">Disciplinas</a></li>
+  <li><a href="#">Deportistas</a></li>
+  <li><a href="#">Entrenamientos</a></li>
+  <li><a href="#">Eventos</a></li>
+  <li><a href="#">Comunicación</a></li>
+  <li><a href="#">Reportes</a></li>
+  <li><a href="#">Documentación</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">Gestión de Grupos</h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'crear_grupo' %}" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Nuevo Grupo</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de grupos -->
+    <div class="table-container">
+        <table class="table is-fullwidth is-striped is-hoverable">
+            <thead>
+                <tr>
+                    <th>Nombre del Grupo</th>
+                    <th>Número de Usuarios</th>
+                    <th>Usuarios Asignados</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grupo in grupos %}
+                <tr>
+                    <td>
+                        <strong>{{ grupo.name }}</strong>
+                    </td>
+                    <td>
+                        <span class="tag is-info">{{ grupo.user_count }}</span>
+                    </td>
+                    <td>
+                        <div class="content">
+                            {% if grupo.user_count > 0 %}
+                                <small>Usuarios:</small><br>
+                                {% for usuario in grupo.user.all|slice:":3" %}
+                                    <span class="tag is-light is-small">{{ usuario.username }}</span>
+                                {% endfor %}
+                                {% if grupo.user_count > 3 %}
+                                    <span class="tag is-light is-small">+{{ grupo.user_count|add:"-3" }} más</span>
+                                {% endif %}
+                            {% else %}
+                                <small class="has-text-grey">Sin usuarios asignados</small>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="buttons are-small">
+                            <a href="{% url 'editar_grupo' grupo.id %}" class="button is-info is-light">
+                                <span class="icon">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            {% if grupo.user_count == 0 %}
+                            <a href="{% url 'eliminar_grupo' grupo.id %}" class="button is-danger is-light">
+                                <span class="icon">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                            {% else %}
+                            <button class="button is-danger is-light" disabled title="No se puede eliminar un grupo con usuarios">
+                                <span class="icon">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="has-text-centered has-text-grey-light">
+                        No hay grupos creados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="columns is-multiline mt-4">
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Total Grupos</p>
+                <p class="title">{{ total_grupos }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Grupos con Usuarios</p>
+                <p class="title has-text-success">{{ grupos_con_usuarios }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Grupos Vacíos</p>
+                <p class="title has-text-warning">{{ grupos_vacios }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Total Asignaciones</p>
+                <p class="title has-text-info">{{ total_asignaciones }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="box mt-4">
+        <h3 class="title is-5">Información sobre Grupos</h3>
+        <div class="content">
+            <ul>
+                <li><strong>Administrador:</strong> Acceso completo al sistema, gestión de usuarios y grupos</li>
+                <li><strong>Coordinador:</strong> Gestión de coordinación y eventos</li>
+                <li><strong>Profesor:</strong> Gestión de enseñanza y entrenamientos</li>
+                <li><strong>Tesoreria:</strong> Gestión financiera y pagos</li>
+                <li><strong>Comision:</strong> Gestión de comisiones y evaluaciones</li>
+            </ul>
+            <p class="has-text-grey-light">
+                <small>Los grupos no se pueden eliminar si tienen usuarios asignados. Primero debe mover o eliminar los usuarios.</small>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- Modal para confirmar eliminación -->
+<div id="deleteModal" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Confirmar eliminación</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            <p>¿Está seguro de que desea eliminar este grupo?</p>
+            <p class="has-text-danger">Esta acción no se puede deshacer.</p>
+        </section>
+        <footer class="modal-card-foot">
+            <form id="deleteForm" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button class="button is-danger" type="submit">Eliminar</button>
+            </form>
+            <button class="button" onclick="closeModal()">Cancelar</button>
+        </footer>
+    </div>
+</div>
+
+<script>
+function confirmDelete(url) {
+    document.getElementById('deleteForm').action = url;
+    document.getElementById('deleteModal').classList.add('is-active');
+}
+
+function closeModal() {
+    document.getElementById('deleteModal').classList.remove('is-active');
+}
+
+// Cerrar modal con ESC o click en background
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('deleteModal');
+    const background = modal.querySelector('.modal-background');
+    const closeBtn = modal.querySelector('.delete');
+    
+    background.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+});
+</script>
+{% endblock %} 

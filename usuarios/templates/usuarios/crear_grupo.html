@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+<h2 class="title is-5 p-3">Administrador</h2>
+<ul class="menu-list p-2">
+  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
+  <li><a href="{% url 'lista_grupos' %}" class="is-active">Grupos</a></li>
+  <li><a href="#">Finanzas</a></li>
+  <li><a href="#">Socios</a></li>
+  <li><a href="#">Disciplinas</a></li>
+  <li><a href="#">Deportistas</a></li>
+  <li><a href="#">Entrenamientos</a></li>
+  <li><a href="#">Eventos</a></li>
+  <li><a href="#">Comunicación</a></li>
+  <li><a href="#">Reportes</a></li>
+  <li><a href="#">Documentación</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">Crear Nuevo Grupo</h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'lista_grupos' %}" class="button is-light">
+                    <span class="icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span>Volver</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="columns">
+        <div class="column is-8">
+            <form method="post" class="box">
+                {% csrf_token %}
+                
+                <div class="field">
+                    <label class="label">Nombre del Grupo *</label>
+                    <div class="control">
+                        <input class="input" type="text" name="nombre" placeholder="Ej: Administrador, Coordinador, Profesor..." required>
+                    </div>
+                    <p class="help">El nombre debe ser único y descriptivo del rol o función del grupo.</p>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="field is-grouped is-grouped-right">
+                    <div class="control">
+                        <a href="{% url 'lista_grupos' %}" class="button is-light">Cancelar</a>
+                    </div>
+                    <div class="control">
+                        <button type="submit" class="button is-primary">
+                            <span class="icon">
+                                <i class="fas fa-save"></i>
+                            </span>
+                            <span>Crear Grupo</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="column is-4">
+            <div class="box">
+                <h3 class="title is-5">Grupos Sugeridos</h3>
+                <div class="content">
+                    <p>Puedes crear estos grupos comunes para el sistema de clubes:</p>
+                    <ul>
+                        <li><strong>Administrador</strong> - Acceso completo al sistema</li>
+                        <li><strong>Coordinador</strong> - Gestión de coordinación</li>
+                        <li><strong>Profesor</strong> - Gestión de enseñanza</li>
+                        <li><strong>Tesoreria</strong> - Gestión financiera</li>
+                        <li><strong>Comision</strong> - Gestión de comisiones</li>
+                        <li><strong>Deportista</strong> - Acceso limitado</li>
+                        <li><strong>Socio</strong> - Acceso básico</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="box mt-4">
+                <h3 class="title is-5">Información</h3>
+                <div class="content">
+                    <ul>
+                        <li>Los grupos definen los permisos y acceso de los usuarios</li>
+                        <li>Un usuario puede pertenecer a múltiples grupos</li>
+                        <li>Los grupos no se pueden eliminar si tienen usuarios asignados</li>
+                        <li>Puedes asignar usuarios a grupos desde la gestión de usuarios</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 

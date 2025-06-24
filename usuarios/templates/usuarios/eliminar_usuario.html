@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+<h2 class="title is-5 p-3">Administrador</h2>
+<ul class="menu-list p-2">
+  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
+  <li><a href="{% url 'lista_usuarios' %}" class="is-active">Usuarios</a></li>
+  <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
+  <li><a href="#">Finanzas</a></li>
+  <li><a href="#">Socios</a></li>
+  <li><a href="#">Disciplinas</a></li>
+  <li><a href="#">Deportistas</a></li>
+  <li><a href="#">Entrenamientos</a></li>
+  <li><a href="#">Eventos</a></li>
+  <li><a href="#">Comunicación</a></li>
+  <li><a href="#">Reportes</a></li>
+  <li><a href="#">Documentación</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">Eliminar Usuario</h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'lista_usuarios' %}" class="button is-light">
+                    <span class="icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span>Volver</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        <div class="content">
+            <h3 class="title is-4 has-text-danger">
+                <span class="icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </span>
+                Confirmar Eliminación
+            </h3>
+            
+            <p class="has-text-grey-dark">
+                ¿Estás seguro de que deseas eliminar al usuario <strong>{{ usuario.username }}</strong>?
+            </p>
+            
+            <div class="notification is-warning is-light">
+                <p><strong>Información del usuario a eliminar:</strong></p>
+                <ul>
+                    <li><strong>Nombre:</strong> {{ usuario.first_name }} {{ usuario.last_name }}</li>
+                    <li><strong>Email:</strong> {{ usuario.email }}</li>
+                    <li><strong>Documento:</strong> 
+                        {% if usuario.perfil %}
+                            {{ usuario.perfil.get_tipo_documento_display }}: {{ usuario.perfil.numero_documento }}
+                        {% else %}
+                            Sin documento
+                        {% endif %}
+                    </li>
+                    <li><strong>Grupos:</strong> 
+                        {% for grupo in usuario.groups.all %}
+                            <span class="tag is-info is-small">{{ grupo.name }}</span>
+                        {% empty %}
+                            Sin grupos
+                        {% endfor %}
+                    </li>
+                    <li><strong>Fecha de registro:</strong> 
+                        {% if usuario.perfil %}
+                            {{ usuario.perfil.fecha_registro|date:"d/m/Y H:i" }}
+                        {% else %}
+                            No disponible
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+
+            {% if usuario == request.user %}
+            <div class="notification is-danger">
+                <p><strong>¡Advertencia!</strong> No puedes eliminar tu propia cuenta.</p>
+            </div>
+            {% else %}
+            <div class="notification is-danger is-light">
+                <p><strong>Esta acción no se puede deshacer.</strong> Se eliminarán permanentemente:</p>
+                <ul>
+                    <li>El usuario y todos sus datos</li>
+                    <li>El perfil asociado</li>
+                    <li>Todas las asignaciones a grupos</li>
+                    <li>Cualquier dato relacionado con este usuario</li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="field is-grouped is-grouped-right">
+                <div class="control">
+                    <a href="{% url 'lista_usuarios' %}" class="button is-light">
+                        <span class="icon">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <span>Cancelar</span>
+                    </a>
+                </div>
+                {% if usuario != request.user %}
+                <div class="control">
+                    <button type="submit" class="button is-danger">
+                        <span class="icon">
+                            <i class="fas fa-trash"></i>
+                        </span>
+                        <span>Eliminar Usuario</span>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %} 
