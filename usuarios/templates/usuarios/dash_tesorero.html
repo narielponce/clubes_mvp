@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block sidebar_menu %}
+<h2 class="title is-5 p-3">Tesorero</h2>
+<ul class="menu-list p-2">
+  <li><a href="#">Inicio</a></li>
+  <li><a href="#">Finanzas</a></li>
+  <li><a href="#">Socios</a></li>
+  <li><a href="#">Documentos</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Panel de Tesorero</h1>
+    <div class="columns is-multiline">
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Gestión deportiva</p>
+                <p class="title">12</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Usuarios</p>
+                <p class="title">145</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Eventos</p>
+                <p class="title">8</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Finanzas</p>
+                <p class="title">+$2300</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
