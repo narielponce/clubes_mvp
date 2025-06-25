@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'usuarios/base_admin.html' %}
 
 {% block sidebar_menu %}
 {{ block.super }}
@@ -23,8 +23,9 @@
             <div class="box">
                 <h2 class="title is-4">Información Personal</h2>
                 <div class="content">
-                    <p><strong>Nombre:</strong> {{ socio.usuario.get_full_name }}</p>
-                    <p><strong>Correo:</strong> {{ socio.usuario.email }}</p>
+                    <p><strong>Nombre:</strong> {{ socio.perfil_usuario.usuario.get_full_name }}</p>
+                    <p><strong>Correo:</strong> {{ socio.perfil_usuario.usuario.email }}</p>
+                    <p><strong>Teléfono:</strong> {{ socio.perfil_usuario.telefono }}</p>
                     <p><strong>Tipo de Socio:</strong> {{ socio.tipo_socio }}</p>
                     <p><strong>Estado:</strong> 
                         <span class="tag {% if socio.esta_activo %}is-success{% else %}is-danger{% endif %}">
