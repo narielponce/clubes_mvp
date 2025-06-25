@@ -1,22 +1,11 @@
 {% extends 'base.html' %}
 
+{% block title %}Mi Área{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="columns is-multiline">
-        <!-- Columna principal -->
         <div class="column is-8">
-            <!-- Botón de volver -->
-            <div class="field has-addons mb-3">
-                <p class="control">
-                    <!-- <a href="{% url 'dashboard' %}" class="button is-info is-light">
-                        <span class="icon is-small">
-                            <i class="fas fa-arrow-left"></i>
-                        </span>
-                        <span>Volver al Dashboard</span>
-                    </a> -->
-                </p>
-            </div>
-            <!-- Información personal -->
             <div class="card">
                 <header class="card-header">
                     <p class="card-header-title">Mi Información</p>
@@ -36,39 +25,13 @@
                 </div>
             </div>
 
-            <!-- Estado de cuenta -->
             <div class="card">
                 <header class="card-header">
                     <p class="card-header-title">Estado de Cuenta</p>
                 </header>
                 <div class="card-content">
-                    <!-- Aquí irá el contenido del estado de cuenta -->
                     <p>Por implementar...</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- Menú lateral -->
-        <div class="column is-4">
-            <aside class="menu">
-                <p class="menu-label">Mi Socio</p>
-                <ul class="menu-list">
-                    <li><a href="{% url 'socios:area' %}" class="is-active">Información Personal</a></li>
-                    <li><a href="#">Estado de Cuenta</a></li>
-                    <li><a href="#">Historial de Pagos</a></li>
-                    <li><a href="#">Servicios Disponibles</a></li>
-                </ul>
-            </aside>
-            <!-- Botón de volver en el menú lateral -->
-            <div class="field has-addons mt-4">
-                <p class="control">
-                    <a href="{% url 'dashboard' %}" class="button is-info is-light is-fullwidth">
-                        <span class="icon is-small">
-                            <i class="fas fa-arrow-left"></i>
-                        </span>
-                        <span>Volver al Dashboard</span>
-                    </a>
-                </p>
             </div>
         </div>
     </div>

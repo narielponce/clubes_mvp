@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Club{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="columns is-fullheight">
+        <!-- Sidebar -->
+        <div class="column is-2 is-sidebar-menu">
+            {% include 'base_menu.html' %}
+        </div>
+
+        <!-- Main content -->
+        <div class="column">
+            <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+                <div class="navbar-brand">
+                    <a class="navbar-item" href="{% url 'dashboard' %}">
+                        <span class="title is-4">Club</span>
+                    </a>
+                    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+
+                <div class="navbar-menu">
+                    <div class="navbar-end">
+                        {% if request.user.is_authenticated %}
+                            <div class="navbar-item has-dropdown is-hoverable">
+                                <a class="navbar-link">
+                                    {{ request.user.get_full_name }}
+                                </a>
+                                <div class="navbar-dropdown">
+                                    <a class="navbar-item" href="{% url 'usuarios:editar_usuario' request.user.id %}">
+                                        Mi perfil
+                                    </a>
+                                    <hr class="navbar-divider">
+                                    <a class="navbar-item" href="{% url 'usuarios:logout' %}">
+                                        Cerrar sesión
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="navbar-item">
+                                <a class="button is-primary" href="{% url 'usuarios:login' %}">
+                                    Iniciar sesión
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+
+            <div class="section">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bulma-extensions@6.2.7/dist/js/bulma-extensions.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

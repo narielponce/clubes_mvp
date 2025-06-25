@@ -1,0 +1,54 @@
+{% extends 'disciplinas/base.html' %}
+
+{% block disciplinas_content %}
+<h1 class="title">Disciplinas</h1>
+
+<div class="buttons">
+    <a href="{% url 'disciplinas:nueva_disciplina' %}" class="button is-primary">
+        <span class="icon"><i class="fas fa-plus"></i></span>
+        <span>Nueva Disciplina</span>
+    </a>
+</div>
+
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Coordinador</th>
+            <th>Lugar</th>
+            <th>Cupo Máximo</th>
+            <th>Costo Mensual</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for disciplina in disciplinas %}
+        <tr>
+            <td>{{ disciplina.nombre }}</td>
+            <td>{{ disciplina.coordinador.usuario.get_full_name }}</td>
+            <td>{{ disciplina.lugar }}</td>
+            <td>{{ disciplina.cupo_maximo }}</td>
+            <td>${{ disciplina.costo_mensual }}</td>
+            <td>
+                {% if disciplina.activa %}
+                    <span class="tag is-success">Activa</span>
+                {% else %}
+                    <span class="tag is-danger">Inactiva</span>
+                {% endif %}
+            </td>
+            <td>
+                <div class="buttons">
+                    <a href="{% url 'disciplinas:editar_disciplina' disciplina.pk %}" class="button is-small is-info">
+                        <span class="icon"><i class="fas fa-edit"></i></span>
+                    </a>
+                    <a href="{% url 'disciplinas:eliminar_disciplina' disciplina.pk %}" class="button is-small is-danger">
+                        <span class="icon"><i class="fas fa-trash"></i></span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

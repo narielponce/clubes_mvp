@@ -1,0 +1,31 @@
+{% extends 'disciplinas/base.html' %}
+
+{% block disciplinas_content %}
+<h1 class="title">{% if form.instance.pk %}Editar{% else %}Nuevo{% endif %} Profesor</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="columns">
+        <div class="column is-half">
+            <div class="field">
+                <label class="label">Usuario</label>
+                {{ form.perfil_usuario }}
+            </div>
+        </div>
+        <div class="column is-half">
+            <div class="field">
+                <label class="label">Especialidad</label>
+                {{ form.especialidad }}
+            </div>
+        </div>
+    </div>
+    <div class="field is-grouped">
+        <div class="control">
+            <button type="submit" class="button is-primary">Guardar</button>
+        </div>
+        <div class="control">
+            <a href="{% url 'disciplinas:lista_profesores' %}" class="button is-light">Cancelar</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

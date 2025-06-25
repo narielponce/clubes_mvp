@@ -1,0 +1,25 @@
+{% extends 'usuarios/base_admin.html' %}
+
+{% block title %}Dashboard de Administrador{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Panel de Administrador</h1>
+    {% if socio %}
+    <div class="notification is-link is-light">
+        <p class="title is-6">Información de Socio</p>
+        <ul>
+            <li><strong>Tipo de Socio:</strong> {{ socio.tipo_socio.get_nombre_display }}</li>
+            <li><strong>Estado:</strong> 
+                <span class="tag {% if socio.esta_activo %}is-success{% else %}is-danger{% endif %}">
+                    {{ socio.get_estado_display }}
+                </span>
+            </li>
+            <li><strong>Fecha de Afiliación:</strong> {{ socio.fecha_afiliacion|date:"d/m/Y" }}</li>
+            <li><strong>Tiempo como Socio:</strong> {{ socio.tiempo_socio }}</li>
+        </ul>
+        <a href="{% url 'socios:area' %}" class="button is-primary">Ver Área de Socio</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

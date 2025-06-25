@@ -1,0 +1,47 @@
+{% extends 'disciplinas/base.html' %}
+
+{% block disciplinas_content %}
+<h1 class="title">{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Disciplina</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="columns">
+        <div class="column is-half">
+            <div class="field">
+                <label class="label">Nombre</label>
+                {{ form.nombre }}
+            </div>
+            <div class="field">
+                <label class="label">Coordinador</label>
+                {{ form.coordinador }}
+            </div>
+            <div class="field">
+                <label class="label">Lugar</label>
+                {{ form.lugar }}
+            </div>
+            <div class="field">
+                <label class="label">Cupo Máximo</label>
+                {{ form.cupo_maximo }}
+            </div>
+        </div>
+        <div class="column is-half">
+            <div class="field">
+                <label class="label">Descripción</label>
+                {{ form.descripcion }}
+            </div>
+            <div class="field">
+                <label class="label">Costo Mensual</label>
+                {{ form.costo_mensual }}
+            </div>
+        </div>
+    </div>
+    <div class="field is-grouped">
+        <div class="control">
+            <button type="submit" class="button is-primary">Guardar</button>
+        </div>
+        <div class="control">
+            <a href="{% url 'disciplinas:lista' %}" class="button is-light">Cancelar</a>
+        </div>
+    </div>
+</form>
+{% endblock %}

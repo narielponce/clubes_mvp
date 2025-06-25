@@ -1,59 +1,16 @@
 {% extends 'base.html' %}
 
-{% block sidebar_menu %}
-<h2 class="title is-5 p-3">Administrador</h2>
-<ul class="menu-list p-2">
-    <li><a href="{% url 'dashboard' %}" class="is-active">Inicio</a></li>
-    <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
-    <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
-    <li><a href="{% url 'socios:lista_socios' %}">Socios</a></li>
-    <li><a href="#">Disciplinas</a></li>
-    <li><a href="#">Deportistas</a></li>
-    <li><a href="#">Finanzas</a></li>
-    <li><a href="#">Entrenamientos</a></li>
-    <li><a href="#">Eventos</a></li>
-    <li><a href="#">Comunicación</a></li>
-    <li><a href="#">Reportes</a></li>
-    <li><a href="#">Documentación</a></li>
-</ul>
-{% endblock %}
+{% block title %}Dashboard de Administrador{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1 class="title">Panel de Administración</h1>
-
-    <!-- Mensajes de éxito/error -->
-    {% if messages %}
-    {% for message in messages %}
-    <div
-        class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
-        <button class="delete"></button>
-        {{ message }}
-    </div>
-    {% endfor %}
-    {% endif %}
-
+    <h1 class="title">Dashboard de Administrador</h1>
     <div class="columns is-multiline">
-        <div class="column is-3">
-            <div class="box has-text-centered">
-                <p class="heading">Clubes</p>
-                <p class="title">12</p>
-            </div>
-        </div>
-        <div class="column is-3">
-            <div class="box has-text-centered">
-                <p class="heading">Usuarios</p>
-                <p class="title">145</p>
-            </div>
-        </div>
-        <div class="column is-3">
-            <div class="box has-text-centered">
-                <p class="heading">Eventos</p>
-                <p class="title">8</p>
-            </div>
-        </div>
-        <div class="column is-3">
-            <div class="box has-text-centered">
+        <div class="column is-4">
+            <div class="card">
+                <div class="card-content">
+                    <p class="title">Usuarios</p>
+                    <p class="subtitle">{{ usuarios_count }}</p>
                 <p class="heading">Finanzas</p>
                 <p class="title">+$2300</p>
             </div>

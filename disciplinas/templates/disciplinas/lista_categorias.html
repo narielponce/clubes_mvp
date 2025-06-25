@@ -1,0 +1,88 @@
+{% extends 'disciplinas/base.html' %}
+
+{% block disciplinas_content %}
+<h1 class="title">Categorías</h1>
+
+<div class="buttons">
+    <a href="{% url 'disciplinas:nueva_categoria' %}" class="button is-primary">
+        <span class="icon"><i class="fas fa-plus"></i></span>
+        <span>Nueva Categoría</span>
+    </a>
+</div>
+
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Disciplina</th>
+            <th>Categoría</th>
+            <th>Profesores</th>
+            <th>Horario</th>
+            <th>Cupo Máximo</th>
+            <th>Inscritos</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for categoria in categorias %}
+        <tr>
+            <td>{{ categoria.disciplina.nombre }}</td>
+            <td>{{ categoria.nombre }}</td>
+            <td>
+                <ul>
+                    {% for profesor in categoria.profesores.all %}
+                    <li>{{ profesor }}</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>{{ categoria.horario }}</td>
+            <td>{{ categoria.cupo_maximo }}</td>
+            <td>{{ categoria.inscritos.filter(activa=True).count }}</td>
+            <td>
+                <div class="buttons">
+                    <a href="{% url 'disciplinas:editar_categoria' categoria.pk %}" class="button is-small is-info">
+                        <span class="icon"><i class="fas fa-edit"></i></span>
+                    </a>
+                    <a href="{% url 'disciplinas:eliminar_categoria' categoria.pk %}" class="button is-small is-danger">
+                        <span class="icon"><i class="fas fa-trash"></i></span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if request.user.perfil.socio %}
+<div class="buttons">
+    <a href="{% url 'disciplinas:inscribirse_categoria' categoria.pk %}" class="button is-success">
+        Inscribirme
+    </a>
+</div>
+{% endif %}
+
+{% if inscripciones %}
+<h2 class="title is-4">Mis Inscripciones</h2>
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Categoría</th>
+            <th>Disciplina</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for inscripcion in inscripciones %}
+        <tr>
+            <td>{{ inscripcion.categoria.nombre }}</td>
+            <td>{{ inscripcion.categoria.disciplina.nombre }}</td>
+            <td>
+                <a href="{% url 'disciplinas:cancelar_inscripcion' inscripcion.pk %}" class="button is-danger">
+                    Cancelar Inscripción
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

@@ -47,7 +47,7 @@ def dashboard(request):
     
     # Determinar el dashboard a mostrar
     if 'Administrador' in grupos:
-        template = 'usuarios/dash_admin.html'
+        template = 'usuarios/admin_dash.html'
         rol = 'Administrador'
     elif 'Coordinador' in grupos:
         template = 'usuarios/dash_coordinador.html'

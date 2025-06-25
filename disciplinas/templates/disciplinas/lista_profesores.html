@@ -1,0 +1,48 @@
+{% extends 'disciplinas/base.html' %}
+
+{% block disciplinas_content %}
+<h1 class="title">Profesores</h1>
+
+<div class="buttons">
+    <a href="{% url 'disciplinas:nuevo_profesor' %}" class="button is-primary">
+        <span class="icon"><i class="fas fa-plus"></i></span>
+        <span>Nuevo Profesor</span>
+    </a>
+</div>
+
+<table class="table is-fullwidth">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Especialidad</th>
+            <th>Categorías</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for profesor in profesores %}
+        <tr>
+            <td>{{ profesor.perfil_usuario.usuario.get_full_name }}</td>
+            <td>{{ profesor.especialidad }}</td>
+            <td>
+                <ul>
+                    {% for categoria in profesor.categorias.all %}
+                    <li>{{ categoria }} ({{ categoria.disciplina }})</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>
+                <div class="buttons">
+                    <a href="{% url 'disciplinas:editar_profesor' profesor.pk %}" class="button is-small is-info">
+                        <span class="icon"><i class="fas fa-edit"></i></span>
+                    </a>
+                    <a href="{% url 'disciplinas:eliminar_profesor' profesor.pk %}" class="button is-small is-danger">
+                        <span class="icon"><i class="fas fa-trash"></i></span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
