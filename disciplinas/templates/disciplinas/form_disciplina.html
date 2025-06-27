@@ -1,6 +1,6 @@
-{% extends 'disciplinas/base.html' %}
+{% extends 'usuarios/base_admin.html' %}
 
-{% block disciplinas_content %}
+{% block content %}
 <h1 class="title">{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Disciplina</h1>
 
 <form method="post">
@@ -19,10 +19,6 @@
                 <label class="label">Lugar</label>
                 {{ form.lugar }}
             </div>
-            <div class="field">
-                <label class="label">Cupo Máximo</label>
-                {{ form.cupo_maximo }}
-            </div>
         </div>
         <div class="column is-half">
             <div class="field">
@@ -32,6 +28,12 @@
             <div class="field">
                 <label class="label">Costo Mensual</label>
                 {{ form.costo_mensual }}
+            </div>
+            <div class="field">
+                <label class="checkbox">
+                    {{ form.activa }}
+                    Disciplina activa
+                </label>
             </div>
         </div>
     </div>

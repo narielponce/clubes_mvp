@@ -11,6 +11,8 @@ from .forms import UsuarioForm, PerfilUsuarioForm
 from django.db.models import Count
 from django.db.models import Q
 from .decorators import verificar_rol
+from socios.models import Socio
+from disciplinas.models import Disciplina, Categoria
 
 def is_admin(user):
     return user.groups.filter(name='Administrador').exists()
@@ -22,14 +24,14 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('dashboard')
+            return redirect('usuarios:dashboard')
         else:
             return render(request, 'usuarios/login.html', {'error': 'Credenciales incorrectas'})
     return render(request, 'usuarios/login.html')
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect('usuarios:login')
 
 @login_required
 def dashboard(request):
@@ -45,10 +47,27 @@ def dashboard(request):
     # Verificar si es socio
     es_socio = hasattr(perfil, 'socio')
     
+    # Definir roles administrativos
+    roles_administrativos = ['Administrador', 'Coordinador', 'Profesor', 'Tesoreria', 'Comision']
+    tiene_rol_administrativo = any(rol in grupos for rol in roles_administrativos)
+    
     # Determinar el dashboard a mostrar
     if 'Administrador' in grupos:
         template = 'usuarios/admin_dash.html'
         rol = 'Administrador'
+        
+        # Agregar estadísticas para el dashboard de administrador
+        context = {
+            'rol': rol,
+            'es_socio': es_socio,
+            'perfil': perfil,
+            'socio': perfil.socio if es_socio else None,
+            'total_socios': Socio.objects.count(),
+            'disciplinas_activas': Disciplina.objects.filter(activa=True).count(),
+            'total_profesores': User.objects.filter(groups__name='Profesor').count(),
+            'total_categorias': Categoria.objects.count(),
+        }
+        return render(request, template, context)
     elif 'Coordinador' in grupos:
         template = 'usuarios/dash_coordinador.html'
         rol = 'Coordinador'
@@ -62,22 +81,11 @@ def dashboard(request):
         template = 'usuarios/dash_comision.html'
         rol = 'Comision'
     else:
-        # Si no tiene rol de grupo pero es socio, mostrar dashboard de socio
+        # Si no tiene rol administrativo pero es socio, redirigir a su área de socio
         if es_socio:
             return redirect('socios:area')
         template = 'usuarios/dashboard.html'
         rol = 'Sin Rol Asignado'
-
-    # Si es socio y no tiene otros roles, redirigir a su área de socio
-    if es_socio and not grupos:
-        return redirect('socios:area')
-
-    return render(request, template, {
-        'rol': rol,
-        'es_socio': es_socio,
-        'perfil': perfil,
-        'socio': perfil.socio if es_socio else None
-    })
 
     return render(request, template, {
         'rol': rol,
@@ -142,8 +150,10 @@ def crear_usuario(request):
             user.set_password(user_form.cleaned_data['password'])
             user.save()
             
-            perfil = perfil_form.save(commit=False)
-            perfil.usuario = user
+            # Actualizar el perfil creado automáticamente por el signal
+            perfil = user.perfil
+            for field in ['tipo_documento', 'numero_documento', 'telefono', 'direccion', 'fecha_nacimiento', 'estado_socio']:
+                setattr(perfil, field, perfil_form.cleaned_data[field])
             perfil.save()
             
             # Asignar grupos
@@ -151,7 +161,7 @@ def crear_usuario(request):
             user.groups.set(grupos)
             
             messages.success(request, 'Usuario creado exitosamente.')
-            return redirect('lista_usuarios')
+            return redirect('usuarios:lista_usuarios')
     else:
         user_form = UsuarioForm()
         perfil_form = PerfilUsuarioForm()
@@ -182,7 +192,7 @@ def editar_usuario(request, user_id):
             user.groups.set(grupos)
             
             messages.success(request, 'Usuario actualizado exitosamente.')
-            return redirect('lista_usuarios')
+            return redirect('usuarios:lista_usuarios')
     else:
         user_form = UsuarioForm(instance=user)
         perfil_form = PerfilUsuarioForm(instance=user.perfil)
@@ -207,7 +217,7 @@ def eliminar_usuario(request, user_id):
         else:
             user.delete()
             messages.success(request, 'Usuario eliminado exitosamente.')
-        return redirect('lista_usuarios')
+        return redirect('usuarios:lista_usuarios')
     
     context = {'usuario': user}
     return render(request, 'usuarios/eliminar_usuario.html', context)
@@ -247,7 +257,7 @@ def crear_grupo(request):
                 messages.success(request, 'Grupo creado exitosamente.')
             else:
                 messages.warning(request, 'El grupo ya existe.')
-            return redirect('lista_grupos')
+            return redirect('usuarios:lista_grupos')
     
     return render(request, 'usuarios/crear_grupo.html')
 
@@ -266,7 +276,7 @@ def editar_grupo(request, grupo_id):
                 grupo.name = nombre
                 grupo.save()
                 messages.success(request, 'Grupo actualizado exitosamente.')
-                return redirect('lista_grupos')
+                return redirect('usuarios:lista_grupos')
     
     context = {'grupo': grupo}
     return render(request, 'usuarios/editar_grupo.html', context)
@@ -282,7 +292,7 @@ def eliminar_grupo(request, grupo_id):
         else:
             grupo.delete()
             messages.success(request, 'Grupo eliminado exitosamente.')
-        return redirect('lista_grupos')
+        return redirect('usuarios:lista_grupos')
     
     context = {'grupo': grupo}
     return render(request, 'usuarios/eliminar_grupo.html', context)

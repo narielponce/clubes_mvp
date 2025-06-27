@@ -32,8 +32,13 @@ class SocioForm(forms.ModelForm):
 
     def clean_perfil_usuario(self):
         perfil = self.cleaned_data['perfil_usuario']
-        if hasattr(perfil, 'socio'):
-            raise forms.ValidationError('Este usuario ya tiene un perfil de socio.')
+        # Permitir el mismo perfil si estamos editando
+        if self.instance.pk:
+            if hasattr(perfil, 'socio') and perfil.socio.pk != self.instance.pk:
+                raise forms.ValidationError('Este usuario ya tiene un perfil de socio.')
+        else:
+            if hasattr(perfil, 'socio'):
+                raise forms.ValidationError('Este usuario ya tiene un perfil de socio.')
         return perfil
 
     def save(self, commit=True):

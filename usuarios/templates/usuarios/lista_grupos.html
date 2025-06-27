@@ -10,7 +10,7 @@
         </div>
         <div class="level-right">
             <div class="level-item">
-                <a href="{% url 'crear_grupo' %}" class="button is-primary">
+                <a href="{% url 'usuarios:crear_grupo' %}" class="button is-primary">
                     <span class="icon">
                         <i class="fas fa-plus"></i>
                     </span>
@@ -57,19 +57,19 @@
                     </td>
                     <td>
                         <div class="buttons are-small">
-                            <a href="{% url 'editar_grupo' grupo.id %}" class="button is-info is-light">
+                            <a href="{% url 'usuarios:editar_grupo' grupo.id %}" class="button is-info">
                                 <span class="icon">
                                     <i class="fas fa-edit"></i>
                                 </span>
                             </a>
                             {% if grupo.user_count == 0 %}
-                            <a href="{% url 'eliminar_grupo' grupo.id %}" class="button is-danger is-light">
+                            <a href="{% url 'usuarios:eliminar_grupo' grupo.id %}" class="button is-danger">
                                 <span class="icon">
                                     <i class="fas fa-trash"></i>
                                 </span>
                             </a>
                             {% else %}
-                            <button class="button is-danger is-light" disabled title="No se puede eliminar un grupo con usuarios">
+                            <button class="button is-danger" disabled title="No se puede eliminar un grupo con usuarios">
                                 <span class="icon">
                                     <i class="fas fa-trash"></i>
                                 </span>
@@ -134,9 +134,6 @@
         </div>
     </div>
 </div>
-
-<!-- Font Awesome para iconos -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <!-- Modal para confirmar eliminación -->
 <div id="deleteModal" class="modal">

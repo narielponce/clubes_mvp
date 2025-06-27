@@ -5,6 +5,55 @@
 {% block content %}
 <div class="container">
     <h1 class="title">Panel de Administrador</h1>
+    
+    <!-- Tablero de estadísticas -->
+    <div class="columns is-multiline mb-5">
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-info">
+                        <i class="fas fa-users fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Total Socios</p>
+                <p class="title has-text-info">{{ total_socios }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-success">
+                        <i class="fas fa-dumbbell fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Disciplinas Activas</p>
+                <p class="title has-text-success">{{ disciplinas_activas }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-warning">
+                        <i class="fas fa-user-graduate fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Profesores</p>
+                <p class="title has-text-warning">{{ total_profesores }}</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-primary">
+                        <i class="fas fa-layer-group fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Categorías</p>
+                <p class="title has-text-primary">{{ total_categorias }}</p>
+            </div>
+        </div>
+    </div>
+    
     {% if socio %}
     <div class="notification is-link is-light">
         <p class="title is-6">Información de Socio</p>

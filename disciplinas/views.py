@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Disciplina, Categoria, Profesor, Horario, Dia, Inscripcion
-from .forms import DisciplinaForm, CategoriaForm, ProfesorForm, HorarioForm, DiaForm
+from django.contrib.auth.models import Group
+from .models import Disciplina, Categoria, Horario, Dia, Inscripcion
+from .forms import DisciplinaForm, CategoriaForm, HorarioForm, DiaForm
 from usuarios.decorators import is_admin
 from django.db import models
 
@@ -11,6 +12,16 @@ from django.db import models
 def lista_disciplinas(request):
     disciplinas = Disciplina.objects.all()
     return render(request, 'disciplinas/lista_disciplinas.html', {'disciplinas': disciplinas})
+
+@login_required
+@is_admin
+def detalle_disciplina(request, pk):
+    disciplina = get_object_or_404(Disciplina, pk=pk)
+    categorias = Categoria.objects.filter(disciplina=disciplina)
+    return render(request, 'disciplinas/disciplina_detalle.html', {
+        'disciplina': disciplina,
+        'categorias': categorias
+    })
 
 @login_required
 @is_admin
@@ -57,6 +68,9 @@ def lista_categorias(request):
 @login_required
 @is_admin
 def crear_categoria(request):
+    # Crear el grupo de profesores si no existe
+    Group.objects.get_or_create(name='Profesor')
+    
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
         if form.is_valid():
@@ -88,47 +102,6 @@ def eliminar_categoria(request, pk):
     categoria.delete()
     messages.success(request, 'Categoría eliminada exitosamente.')
     return redirect('disciplinas:lista_categorias')
-
-@login_required
-@is_admin
-def lista_profesores(request):
-    profesores = Profesor.objects.select_related('perfil_usuario').all()
-    return render(request, 'disciplinas/lista_profesores.html', {'profesores': profesores})
-
-@login_required
-@is_admin
-def crear_profesor(request):
-    if request.method == 'POST':
-        form = ProfesorForm(request.POST)
-        if form.is_valid():
-            profesor = form.save()
-            messages.success(request, 'Profesor creado exitosamente.')
-            return redirect('disciplinas:lista_profesores')
-    else:
-        form = ProfesorForm()
-    return render(request, 'disciplinas/form_profesor.html', {'form': form})
-
-@login_required
-@is_admin
-def editar_profesor(request, pk):
-    profesor = get_object_or_404(Profesor, pk=pk)
-    if request.method == 'POST':
-        form = ProfesorForm(request.POST, instance=profesor)
-        if form.is_valid():
-            profesor = form.save()
-            messages.success(request, 'Profesor actualizado exitosamente.')
-            return redirect('disciplinas:lista_profesores')
-    else:
-        form = ProfesorForm(instance=profesor)
-    return render(request, 'disciplinas/form_profesor.html', {'form': form})
-
-@login_required
-@is_admin
-def eliminar_profesor(request, pk):
-    profesor = get_object_or_404(Profesor, pk=pk)
-    profesor.delete()
-    messages.success(request, 'Profesor eliminado exitosamente.')
-    return redirect('disciplinas:lista_profesores')
 
 @login_required
 def inscribirse_categoria(request, categoria_pk):

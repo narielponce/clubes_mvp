@@ -1,23 +1,5 @@
 {% extends 'base.html' %}
 
-{% block sidebar_menu %}
-<h2 class="title is-5 p-3">Administrador</h2>
-<ul class="menu-list p-2">
-  <li><a href="{% url 'dashboard' %}">Inicio</a></li>
-  <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
-  <li><a href="{% url 'lista_grupos' %}" class="is-active">Grupos</a></li>
-  <li><a href="#">Finanzas</a></li>
-  <li><a href="#">Socios</a></li>
-  <li><a href="#">Disciplinas</a></li>
-  <li><a href="#">Deportistas</a></li>
-  <li><a href="#">Entrenamientos</a></li>
-  <li><a href="#">Eventos</a></li>
-  <li><a href="#">Comunicación</a></li>
-  <li><a href="#">Reportes</a></li>
-  <li><a href="#">Documentación</a></li>
-</ul>
-{% endblock %}
-
 {% block content %}
 <div class="container">
     <div class="level">
@@ -28,7 +10,7 @@
         </div>
         <div class="level-right">
             <div class="level-item">
-                <a href="{% url 'lista_grupos' %}" class="button is-light">
+                <a href="{% url 'usuarios:lista_grupos' %}" class="button is-light">
                     <span class="icon">
                         <i class="fas fa-arrow-left"></i>
                     </span>
@@ -87,7 +69,7 @@
             {% csrf_token %}
             <div class="field is-grouped is-grouped-right">
                 <div class="control">
-                    <a href="{% url 'lista_grupos' %}" class="button is-light">
+                    <a href="{% url 'usuarios:lista_grupos' %}" class="button is-light">
                         <span class="icon">
                             <i class="fas fa-times"></i>
                         </span>

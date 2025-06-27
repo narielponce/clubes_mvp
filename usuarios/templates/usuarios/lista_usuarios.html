@@ -10,7 +10,7 @@
         </div>
         <div class="level-right">
             <div class="level-item">
-                <a href="{% url 'crear_usuario' %}" class="button is-primary">
+                <a href="{% url 'usuarios:crear_usuario' %}" class="button is-primary">
                     <span class="icon">
                         <i class="fas fa-plus"></i>
                     </span>
@@ -83,7 +83,7 @@
                 <div class="field">
                     <label class="label">&nbsp;</label>
                     <div class="control">
-                        <a href="{% url 'lista_usuarios' %}" class="button is-light is-fullwidth">
+                        <a href="{% url 'usuarios:lista_usuarios' %}" class="button is-light is-fullwidth">
                             <span class="icon">
                                 <i class="fas fa-times"></i>
                             </span>
@@ -160,13 +160,13 @@
                     </td>
                     <td>
                         <div class="buttons are-small">
-                            <a href="{% url 'editar_usuario' usuario.id %}" class="button is-info is-light">
+                            <a href="{% url 'usuarios:editar_usuario' usuario.id %}" class="button is-info">
                                 <span class="icon">
                                     <i class="fas fa-edit"></i>
                                 </span>
                             </a>
                             {% if usuario != request.user %}
-                            <a href="{% url 'eliminar_usuario' usuario.id %}" class="button is-danger is-light">
+                            <a href="{% url 'usuarios:eliminar_usuario' usuario.id %}" class="button is-danger">
                                 <span class="icon">
                                     <i class="fas fa-trash"></i>
                                 </span>
@@ -215,6 +215,4 @@
     </div>
 </div>
 
-<!-- Font Awesome para iconos -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 {% endblock %} 

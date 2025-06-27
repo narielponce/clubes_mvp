@@ -1,0 +1,109 @@
+{% extends 'usuarios/base_admin.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="mb-4">
+        <a href="{% url 'disciplinas:lista' %}" class="button is-light">
+            <span class="icon"><i class="fas fa-arrow-left"></i></span>
+            <span>Volver al listado</span>
+        </a>
+    </div>
+    <div class="card mb-5">
+        <div class="card-content">
+            <h2 class="title is-4">{{ disciplina.nombre }}</h2>
+            <p class="subtitle">{{ disciplina.descripcion }}</p>
+            <div class="content">
+                <p><strong>Coordinador:</strong> {{ disciplina.coordinador.usuario.get_full_name }}</p>
+                <p><strong>Lugar:</strong> {{ disciplina.lugar }}</p>
+                <p><strong>Costo Mensual:</strong> ${{ disciplina.costo_mensual }}</p>
+                <p><strong>Estado:</strong>
+                    {% if disciplina.activa %}
+                        <span class="tag is-success">Activa</span>
+                    {% else %}
+                        <span class="tag is-danger">Inactiva</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <footer class="card-footer">
+            <a href="{% url 'disciplinas:editar_disciplina' disciplina.pk %}" class="card-footer-item has-background-warning-light">
+                <span class="icon"><i class="fas fa-edit"></i></span>
+                <span>Editar</span>
+            </a>
+            <a href="{% url 'disciplinas:eliminar_disciplina' disciplina.pk %}" class="card-footer-item has-background-danger-light">
+                <span class="icon"><i class="fas fa-trash"></i></span>
+                <span>Eliminar</span>
+            </a>
+        </footer>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <p class="card-header-title">Categorías</p>
+            <div class="card-header-icon">
+                <a href="{% url 'disciplinas:nueva_categoria' %}?disciplina={{ disciplina.pk }}" class="button is-primary is-small">
+                    <span class="icon"><i class="fas fa-plus"></i></span>
+                    <span>Nueva Categoría</span>
+                </a>
+            </div>
+        </div>
+        <div class="card-content">
+            {% if categorias.exists %}
+            <table class="table is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Profesores</th>
+                        <th>Especialidad</th>
+                        <th>Cupo Máximo</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for categoria in categorias %}
+                    <tr>
+                        <td>{{ categoria.nombre }}</td>
+                        <td>
+                            <div class="tags">
+                                {% for profesor in categoria.profesores.all %}
+                                <span class="tag">{{ profesor.usuario.get_full_name }}</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>{{ categoria.especialidad }}</td>
+                        <td>{{ categoria.cupo_maximo }}</td>
+                        <td>{{ categoria.horario }}</td>
+                        <td>
+                            {% if categoria.activa %}
+                                <span class="tag is-success">Activa</span>
+                            {% else %}
+                                <span class="tag is-danger">Inactiva</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="buttons">
+                                <a href="{% url 'disciplinas:editar_categoria' categoria.pk %}" class="button is-small is-warning">
+                                    <span class="icon"><i class="fas fa-edit"></i></span>
+                                    <span>Editar</span>
+                                </a>
+                                <a href="{% url 'disciplinas:eliminar_categoria' categoria.pk %}" class="button is-small is-danger">
+                                    <span class="icon"><i class="fas fa-trash"></i></span>
+                                    <span>Eliminar</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="notification is-info">
+                No hay categorías registradas para esta disciplina.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

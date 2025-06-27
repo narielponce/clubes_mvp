@@ -1,6 +1,6 @@
-{% extends 'disciplinas/base.html' %}
+{% extends 'usuarios/base_admin.html' %}
 
-{% block disciplinas_content %}
+{% block content %}
 <h1 class="title">{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Categoría</h1>
 
 <form method="post">
@@ -36,7 +36,7 @@
             <button type="submit" class="button is-primary">Guardar</button>
         </div>
         <div class="control">
-            <a href="{% url 'disciplinas:lista_categorias' %}" class="button is-light">Cancelar</a>
+            <a href="{% url 'disciplinas:lista' %}" class="button is-light">Cancelar</a>
         </div>
     </div>
 </form>

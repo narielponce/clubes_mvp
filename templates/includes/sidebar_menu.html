@@ -1,12 +1,20 @@
 {% load static %}
 
-<h2 class="title is-5 p-3">Administrador</h2>
+<div class="p-3 has-text-centered">
+    <div class="mb-3">
+        <span class="icon is-large has-text-primary">
+            <i class="fas fa-dumbbell fa-2x"></i>
+        </span>
+    </div>
+    <h2 class="title is-5 has-text-primary">Club Los Amigos</h2>
+    <p class="is-size-7 has-text-grey-light">Sistema de Gestión</p>
+</div>
 <ul class="menu-list p-2">
-    <li><a href="{% url 'dashboard' %}">Inicio</a></li>
-    <li><a href="{% url 'lista_usuarios' %}">Usuarios</a></li>
-    <li><a href="{% url 'lista_grupos' %}">Grupos</a></li>
-    <li><a href="{% url 'socios:lista_socios' %}">Socios</a></li>
-    <li><a href="{% url 'disciplinas:lista' %}">Disciplinas</a></li>
+    <li><a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>Inicio</a></li>
+    <li><a href="{% url 'usuarios:lista_usuarios' %}" {% if request.path == '/usuarios/usuarios/' %}class="is-active"{% endif %}>Usuarios</a></li>
+    <li><a href="{% url 'usuarios:lista_grupos' %}" {% if request.path == '/usuarios/grupos/' %}class="is-active"{% endif %}>Grupos</a></li>
+    <li><a href="{% url 'socios:lista_socios' %}" {% if request.path == '/socios/' %}class="is-active"{% endif %}>Socios</a></li>
+    <li><a href="{% url 'disciplinas:lista' %}" {% if request.path == '/disciplinas/disciplinas/' %}class="is-active"{% endif %}>Disciplinas</a></li>
     <li><a href="#">Deportistas</a></li>
     <li><a href="#">Finanzas</a></li>
     <li><a href="#">Entrenamientos</a></li>

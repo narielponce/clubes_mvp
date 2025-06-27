@@ -1,11 +1,15 @@
-{% extends 'disciplinas/base.html' %}
+{% extends 'usuarios/base_admin.html' %}
 
-{% block disciplinas_content %}
+{% block content %}
 <h1 class="title">Categorías</h1>
 
 <div class="buttons">
+    <a href="{% url 'disciplinas:lista' %}" class="button is-info">
+        <span class="icon"><i class="fas fa-undo"></i></span>
+        <span>Volver a Disciplinas</span>
+    </a>
     <a href="{% url 'disciplinas:nueva_categoria' %}" class="button is-primary">
-        <span class="icon"><i class="fas fa-plus"></i></span>
+        <span class="icon"><i class="fas fa-plus-circle"></i></span>
         <span>Nueva Categoría</span>
     </a>
 </div>
@@ -36,14 +40,16 @@
             </td>
             <td>{{ categoria.horario }}</td>
             <td>{{ categoria.cupo_maximo }}</td>
-            <td>{{ categoria.inscritos.filter(activa=True).count }}</td>
+            <td>{{ categoria.inscritos.filter.activa|yesno:'True,False'|length }}</td>
             <td>
                 <div class="buttons">
-                    <a href="{% url 'disciplinas:editar_categoria' categoria.pk %}" class="button is-small is-info">
-                        <span class="icon"><i class="fas fa-edit"></i></span>
+                    <a href="{% url 'disciplinas:editar_categoria' categoria.pk %}" class="button is-small is-warning">
+                        <span class="icon"><i class="fas fa-pen"></i></span>
+                        <span>Editar</span>
                     </a>
                     <a href="{% url 'disciplinas:eliminar_categoria' categoria.pk %}" class="button is-small is-danger">
-                        <span class="icon"><i class="fas fa-trash"></i></span>
+                        <span class="icon"><i class="fas fa-trash-alt"></i></span>
+                        <span>Eliminar</span>
                     </a>
                 </div>
             </td>

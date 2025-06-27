@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Club{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <div class="columns is-fullheight">
         <!-- Sidebar -->
         <div class="column is-2 is-sidebar-menu">
-            {% include 'base_menu.html' %}
+            {% include 'includes/sidebar_menu.html' %}
         </div>
 
         <!-- Main content -->
         <div class="column">
             <nav class="navbar is-light" role="navigation" aria-label="main navigation">
                 <div class="navbar-brand">
-                    <a class="navbar-item" href="{% url 'dashboard' %}">
-                        <span class="title is-4">Club</span>
-                    </a>
+                    <!--<a class="navbar-item" href="{% url 'usuarios:dashboard' %}">
+                        <span class="title is-4">Club Los Amigos</span>
+                    </a>-->
                     <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
                         <span aria-hidden="true"></span>
                         <span aria-hidden="true"></span>
@@ -34,7 +34,7 @@
                         {% if request.user.is_authenticated %}
                             <div class="navbar-item has-dropdown is-hoverable">
                                 <a class="navbar-link">
-                                    {{ request.user.get_full_name }}
+                                    {{ request.user.get_full_name }} - {{ request.user.groups.first.name }}
                                 </a>
                                 <div class="navbar-dropdown">
                                     <a class="navbar-item" href="{% url 'usuarios:editar_usuario' request.user.id %}">
