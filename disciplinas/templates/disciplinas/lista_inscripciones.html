@@ -1,0 +1,98 @@
+{% extends 'usuarios/base_coordinador.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Inscripciones{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">Inscripciones</h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'disciplinas:nueva_inscripcion' %}" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Nueva Inscripción</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if inscripciones %}
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th>Socio</th>
+                        <th>Disciplina</th>
+                        <th>Categoría</th>
+                        <th>Fecha de Inscripción</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inscripcion in inscripciones %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ inscripcion.socio.perfil_usuario.usuario.get_full_name }}</strong>
+                                    <br>
+                                    <small class="has-text-grey">{{ inscripcion.socio.tipo_socio }}</small>
+                                </div>
+                            </td>
+                            <td>{{ inscripcion.categoria.disciplina.nombre }}</td>
+                            <td>
+                                <div>
+                                    <strong>{{ inscripcion.categoria.nombre }}</strong>
+                                    {% if inscripcion.categoria.especialidad %}
+                                        <br>
+                                        <small class="has-text-grey">{{ inscripcion.categoria.especialidad }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if inscripcion.activa %}
+                                    <span class="tag is-success">Activa</span>
+                                {% else %}
+                                    <span class="tag is-danger">Cancelada</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if inscripcion.activa %}
+                                    <div class="buttons are-small">
+                                        <a href="{% url 'disciplinas:cancelar_inscripcion_admin' inscripcion.pk %}" 
+                                           class="button is-danger is-outlined"
+                                           title="Cancelar inscripción">
+                                            <span class="icon">
+                                                <i class="fas fa-times"></i>
+                                            </span>
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <span class="has-text-grey">Sin acciones</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="notification is-info is-light">
+            <p><strong>Total de inscripciones activas:</strong> {{ inscripciones.count }}</p>
+        </div>
+    {% else %}
+        <div class="notification is-warning is-light">
+            <p>No hay inscripciones registradas.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

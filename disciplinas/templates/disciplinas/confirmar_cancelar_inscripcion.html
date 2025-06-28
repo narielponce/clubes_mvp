@@ -1,0 +1,74 @@
+{% extends 'usuarios/base_coordinador.html' %}
+{% load static %}
+
+{% block title %}Cancelar Inscripción{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="columns is-centered">
+        <div class="column is-6">
+            <div class="box">
+                <h1 class="title has-text-danger">Cancelar Inscripción</h1>
+                
+                <div class="notification is-warning is-light">
+                    <p><strong>¿Estás seguro de que deseas cancelar esta inscripción?</strong></p>
+                </div>
+                
+                <div class="content">
+                    <div class="field">
+                        <label class="label">Socio:</label>
+                        <p class="has-text-weight-semibold">
+                            {{ inscripcion.socio.perfil_usuario.usuario.get_full_name }}
+                        </p>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">Disciplina:</label>
+                        <p class="has-text-weight-semibold">
+                            {{ inscripcion.categoria.disciplina.nombre }}
+                        </p>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">Categoría:</label>
+                        <p class="has-text-weight-semibold">
+                            {{ inscripcion.categoria.nombre }}
+                            {% if inscripcion.categoria.especialidad %}
+                                <br>
+                                <small class="has-text-grey">{{ inscripcion.categoria.especialidad }}</small>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="label">Fecha de Inscripción:</label>
+                        <p>{{ inscripcion.fecha_inscripcion|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-danger">
+                                <span class="icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Confirmar Cancelación</span>
+                            </button>
+                        </div>
+                        <div class="control">
+                            <a href="{% url 'disciplinas:lista_inscripciones' %}" class="button is-light">
+                                <span class="icon">
+                                    <i class="fas fa-arrow-left"></i>
+                                </span>
+                                <span>Cancelar</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

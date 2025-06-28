@@ -4,6 +4,7 @@ from socios.models import Socio
 from disciplinas.models import Disciplina, Categoria
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from django.utils import timezone
 
 class Cuenta(models.Model):
     TIPO_CUENTA_CHOICES = [
@@ -60,6 +61,31 @@ class Deuda(models.Model):
         self.monto_total = total
         self.save()
         return total
+    
+    def calcular_total_pagado(self):
+        """Calcula el total pagado sumando todas las transacciones relacionadas"""
+        return sum(
+            transaccion.monto 
+            for transaccion in self.transacciones.filter(tipo='INGRESO', categoria='CUOTAS')
+        )
+    
+    def verificar_y_actualizar_estado(self):
+        """Verifica si la deuda está pagada y actualiza su estado"""
+        total_pagado = self.calcular_total_pagado()
+        
+        if total_pagado >= self.monto_total:
+            if self.estado != 'PAGADA':
+                self.estado = 'PAGADA'
+                self.save()
+                return True
+        else:
+            # Verificar si está vencida
+            if self.fecha_vencimiento < timezone.now().date() and self.estado == 'PENDIENTE':
+                self.estado = 'VENCIDA'
+                self.save()
+                return True
+        
+        return False
 
 class ItemDeuda(models.Model):
     TIPO_ITEM_CHOICES = [
@@ -136,6 +162,10 @@ class Transaccion(models.Model):
         
         self.cuenta.save()
         super().save(*args, **kwargs)
+        
+        # Actualizar estado de la deuda si está relacionada
+        if self.deuda_relacionada and self.tipo == 'INGRESO' and self.categoria == 'CUOTAS':
+            self.deuda_relacionada.verificar_y_actualizar_estado()
 
 class Comprobante(models.Model):
     TIPO_CHOICES = [

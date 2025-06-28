@@ -12,7 +12,9 @@
     <div class="columns is-fullheight">
         <!-- Sidebar -->
         <div class="column is-2 is-sidebar-menu">
-            {% include 'includes/sidebar_menu.html' %}
+            {% block sidebar_menu %}
+                {% include 'includes/sidebar_menu.html' %}
+            {% endblock %}
         </div>
 
         <!-- Main content -->
@@ -34,7 +36,7 @@
                         {% if request.user.is_authenticated %}
                             <div class="navbar-item has-dropdown is-hoverable">
                                 <a class="navbar-link">
-                                    {{ request.user.get_full_name }} - {{ request.user.groups.first.name }}
+                                    Bienvenido, {{ request.user.get_full_name }} ({{ request.user.groups.first.name }})
                                 </a>
                                 <div class="navbar-dropdown">
                                     <a class="navbar-item" href="{% url 'usuarios:editar_usuario' request.user.id %}">

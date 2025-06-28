@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.models import Group, User
 from usuarios.models import PerfilUsuario
-from .models import Disciplina, Categoria, Horario, Dia
+from .models import Disciplina, Categoria, Horario, Dia, Inscripcion
+from socios.models import Socio
 
 class DisciplinaForm(forms.ModelForm):
     class Meta:
@@ -40,7 +41,7 @@ class CategoriaForm(forms.ModelForm):
 
     class Meta:
         model = Categoria
-        fields = ['disciplina', 'nombre', 'profesores', 'horario', 'cupo_maximo']
+        fields = ['disciplina', 'nombre', 'profesores', 'horario', 'cupo_maximo', 'especialidad']
         widgets = {
             'disciplina': forms.Select(attrs={'class': 'select'}),
             'nombre': forms.TextInput(attrs={'class': 'input'}),
@@ -66,3 +67,50 @@ class DiaForm(forms.ModelForm):
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'input'})
         }
+
+class InscripcionForm(forms.ModelForm):
+    class Meta:
+        model = Inscripcion
+        fields = ['socio', 'categoria']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar solo socios activos (usuario activo y estado_socio = 'ACTIVO')
+        self.fields['socio'].queryset = Socio.objects.filter(
+            perfil_usuario__usuario__is_active=True,
+            perfil_usuario__estado_socio='ACTIVO'
+        ).select_related('perfil_usuario__usuario')
+        
+        # Filtrar solo categorías activas
+        self.fields['categoria'].queryset = Categoria.objects.filter(
+            disciplina__activa=True
+        ).select_related('disciplina')
+        
+        # Personalizar las etiquetas
+        self.fields['socio'].label = 'Socio'
+        self.fields['categoria'].label = 'Categoría'
+        
+        # Agregar placeholders
+        self.fields['socio'].widget.attrs.update({'class': 'input'})
+        self.fields['categoria'].widget.attrs.update({'class': 'input'})
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        socio = cleaned_data.get('socio')
+        categoria = cleaned_data.get('categoria')
+        
+        if socio and categoria:
+            # Verificar si ya existe una inscripción activa
+            if Inscripcion.objects.filter(socio=socio, categoria=categoria, activa=True).exists():
+                raise forms.ValidationError(
+                    f"El socio {socio} ya está inscrito en la categoría {categoria}"
+                )
+            
+            # Verificar cupo disponible
+            inscritos_activos = categoria.inscritos.filter(activa=True).count()
+            if inscritos_activos >= categoria.cupo_maximo:
+                raise forms.ValidationError(
+                    f"La categoría {categoria} ha alcanzado su cupo máximo ({categoria.cupo_maximo} personas)"
+                )
+        
+        return cleaned_data

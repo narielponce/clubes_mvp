@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from .models import Disciplina, Categoria, Horario, Dia, Inscripcion
-from .forms import DisciplinaForm, CategoriaForm, HorarioForm, DiaForm
+from .forms import DisciplinaForm, CategoriaForm, HorarioForm, DiaForm, InscripcionForm
 from usuarios.decorators import is_admin
 from django.db import models
+
+def is_admin_or_coordinador(user):
+    """Verifica si el usuario es administrador o coordinador"""
+    return user.groups.filter(name__in=['Administrador', 'Coordinador']).exists()
 
 @login_required
 @is_admin
@@ -122,3 +126,62 @@ def cancelar_inscripcion(request, inscripcion_pk):
     inscripcion.save()
     messages.success(request, 'Inscripción cancelada exitosamente.')
     return redirect('disciplinas:lista_categorias')
+
+@login_required
+@user_passes_test(is_admin_or_coordinador)
+def nueva_inscripcion(request):
+    """
+    Vista para que el coordinador pueda inscribir a un socio en una categoría
+    """
+    if request.method == 'POST':
+        form = InscripcionForm(request.POST)
+        if form.is_valid():
+            inscripcion = form.save()
+            messages.success(
+                request, 
+                f'Inscripción exitosa: {inscripcion.socio} en {inscripcion.categoria}'
+            )
+            return redirect('disciplinas:lista_inscripciones')
+    else:
+        form = InscripcionForm()
+    
+    return render(request, 'disciplinas/form_inscripcion.html', {
+        'form': form,
+        'title': 'Nueva Inscripción',
+        'submit_text': 'Crear Inscripción'
+    })
+
+@login_required
+@user_passes_test(is_admin_or_coordinador)
+def lista_inscripciones(request):
+    """
+    Vista para listar todas las inscripciones activas
+    """
+    inscripciones = Inscripcion.objects.filter(activa=True).select_related(
+        'socio__perfil_usuario__usuario',
+        'categoria__disciplina'
+    ).order_by('-fecha_inscripcion')
+    
+    return render(request, 'disciplinas/lista_inscripciones.html', {
+        'inscripciones': inscripciones
+    })
+
+@login_required
+@user_passes_test(is_admin_or_coordinador)
+def cancelar_inscripcion_admin(request, inscripcion_pk):
+    """
+    Vista para que el coordinador pueda cancelar una inscripción
+    """
+    inscripcion = get_object_or_404(Inscripcion, pk=inscripcion_pk)
+    if request.method == 'POST':
+        inscripcion.activa = False
+        inscripcion.save()
+        messages.success(
+            request, 
+            f'Inscripción cancelada: {inscripcion.socio} en {inscripcion.categoria}'
+        )
+        return redirect('disciplinas:lista_inscripciones')
+    
+    return render(request, 'disciplinas/confirmar_cancelar_inscripcion.html', {
+        'inscripcion': inscripcion
+    })

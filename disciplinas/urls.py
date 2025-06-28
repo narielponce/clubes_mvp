@@ -17,7 +17,12 @@ urlpatterns = [
     path('categorias/editar/<int:pk>/', views.editar_categoria, name='editar_categoria'),
     path('categorias/eliminar/<int:pk>/', views.eliminar_categoria, name='eliminar_categoria'),
     
-    # Inscripciones
+    # Inscripciones (para coordinadores)
+    path('inscripciones/', views.lista_inscripciones, name='lista_inscripciones'),
+    path('inscripciones/nueva/', views.nueva_inscripcion, name='nueva_inscripcion'),
+    path('inscripciones/cancelar/<int:inscripcion_pk>/', views.cancelar_inscripcion_admin, name='cancelar_inscripcion_admin'),
+    
+    # Inscripciones (para usuarios)
     path('inscribirse/<int:categoria_pk>/', views.inscribirse_categoria, name='inscribirse_categoria'),
     path('cancelar-inscripcion/<int:inscripcion_pk>/', views.cancelar_inscripcion, name='cancelar_inscripcion'),
 ]

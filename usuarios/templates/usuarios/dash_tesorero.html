@@ -1,8 +1,68 @@
-{% extends 'usuarios/base_admin.html' %}
+{% extends 'usuarios/base_tesorero.html' %}
+{% load humanize %}
+{% block title %}Dashboard de Tesorero{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1 class="title">Panel de Tesorero</h1>
+    <h1 class="title">
+        <span class="icon has-text-primary">
+            <i class="fas fa-chart-line"></i>
+        </span>
+        Tablero principal
+    </h1>
+    
+    <!-- Tablero de estadísticas financieras -->
+    <div class="columns is-multiline mb-5">
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-success">
+                        <i class="fas fa-wallet fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Saldo Total</p>
+                <p class="title has-text-success">${{ saldo_total|default:0|intcomma }}</p>
+                <p class="is-size-7 has-text-grey-light">Todas las cuentas</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-warning">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Deudas Pendientes</p>
+                <p class="title has-text-warning">{{ deudas_pendientes|default:0 }}</p>
+                <p class="is-size-7 has-text-grey-light">Por cobrar</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-danger">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Deudas Vencidas</p>
+                <p class="title has-text-danger">{{ deudas_vencidas|default:0 }}</p>
+                <p class="is-size-7 has-text-grey-light">Requieren atención</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <div class="mb-3">
+                    <span class="icon is-large has-text-info">
+                        <i class="fas fa-university fa-2x"></i>
+                    </span>
+                </div>
+                <p class="heading">Cuentas Activas</p>
+                <p class="title has-text-info">{{ cuentas_activas|default:0 }}/{{ total_cuentas|default:0 }}</p>
+                <p class="is-size-7 has-text-grey-light">Cuentas disponibles</p>
+            </div>
+        </div>
+    </div>
+
     {% if socio %}
     <div class="notification is-link is-light">
         <p class="title is-6">Información de Socio</p>
@@ -19,31 +79,5 @@
         <a href="{% url 'socios:area' %}" class="button is-primary">Ver Área de Socio</a>
     </div>
     {% endif %}
-    <!-- <div class="columns is-multiline">
-        <div class="column is-3">
-            <div class="box has-text-centered">
-                <p class="heading">Gestión deportiva</p>
-                <p class="title">12</p>
-            </div>
-        </div>
-        <div class="column is-3">
-            <div class="box has-text-centered">
-                <p class="heading">Usuarios</p>
-                <p class="title">145</p>
-            </div>
-        </div>
-        <div class="column is-3">
-            <div class="box has-text-centered">
-                <p class="heading">Eventos</p>
-                <p class="title">8</p>
-            </div>
-        </div>
-        <div class="column is-3">
-            <div class="box has-text-centered">
-                <p class="heading">Finanzas</p>
-                <p class="title">+$2300</p>
-            </div>
-        </div>
-    </div> -->
 </div>
 {% endblock %}

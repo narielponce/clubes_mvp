@@ -233,14 +233,33 @@ def generar_deudas_masivas(request):
                     
                     # Agregar cuotas de disciplinas si se solicitó
                     if incluir_disciplinas:
-                        # Aquí deberías obtener las disciplinas del socio
-                        # Por ahora, agregamos un item genérico
-                        ItemDeuda.objects.create(
-                            deuda=deuda,
-                            tipo='CUOTA_DISCIPLINA',
-                            descripcion='Cuota por disciplinas practicadas',
-                            monto=0  # Se debería calcular basado en las disciplinas del socio
-                        )
+                        # Obtener las inscripciones activas del socio
+                        inscripciones_activas = socio.inscripciones.filter(activa=True)
+                        
+                        if inscripciones_activas.exists():
+                            # Agrupar por disciplina para evitar duplicados
+                            disciplinas_unicas = {}
+                            for inscripcion in inscripciones_activas:
+                                disciplina = inscripcion.categoria.disciplina
+                                if disciplina.id not in disciplinas_unicas:
+                                    disciplinas_unicas[disciplina.id] = disciplina
+                            
+                            # Crear un item por cada disciplina única
+                            for disciplina in disciplinas_unicas.values():
+                                ItemDeuda.objects.create(
+                                    deuda=deuda,
+                                    tipo='CUOTA_DISCIPLINA',
+                                    descripcion=f'Cuota mensual - {disciplina.nombre}',
+                                    monto=disciplina.costo_mensual
+                                )
+                        else:
+                            # Si no tiene inscripciones activas, crear un item vacío
+                            ItemDeuda.objects.create(
+                                deuda=deuda,
+                                tipo='CUOTA_DISCIPLINA',
+                                descripcion='Cuota por disciplinas practicadas',
+                                monto=0
+                            )
                     
                     deuda.calcular_total()
                     deudas_creadas += 1

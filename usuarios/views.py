@@ -12,10 +12,14 @@ from django.db.models import Count
 from django.db.models import Q
 from .decorators import verificar_rol
 from socios.models import Socio
-from disciplinas.models import Disciplina, Categoria
+from disciplinas.models import Disciplina, Categoria, Inscripcion
+from finanzas.models import Cuenta, Deuda
 
 def is_admin(user):
     return user.groups.filter(name='Administrador').exists()
+
+def is_coordinador(user):
+    return user.groups.filter(name='Coordinador').exists()
 
 def login_view(request):
     if request.method == 'POST':
@@ -69,14 +73,57 @@ def dashboard(request):
         }
         return render(request, template, context)
     elif 'Coordinador' in grupos:
-        template = 'usuarios/dash_coordinador.html'
+        template = 'usuarios/dashboard.html'
         rol = 'Coordinador'
+        
+        # Agregar estadísticas para el dashboard de coordinador
+        disciplinas_coordinadas = Disciplina.objects.filter(coordinador=perfil, activa=True)
+        disciplinas_count = disciplinas_coordinadas.count()
+        categorias_count = Categoria.objects.filter(disciplina__in=disciplinas_coordinadas).count()
+        total_inscritos = Inscripcion.objects.filter(
+            categoria__disciplina__in=disciplinas_coordinadas,
+            activa=True
+        ).count()
+        eventos_count = 0  # Por ahora, se puede implementar más adelante
+        
+        context = {
+            'rol': rol,
+            'es_socio': es_socio,
+            'perfil': perfil,
+            'socio': perfil.socio if es_socio else None,
+            'disciplinas_count': disciplinas_count,
+            'categorias_count': categorias_count,
+            'total_inscritos': total_inscritos,
+            'eventos_count': eventos_count,
+            'disciplinas_coordinadas': disciplinas_coordinadas,
+        }
+        return render(request, template, context)
     elif 'Profesor' in grupos:
         template = 'usuarios/dash_profesor.html'
         rol = 'Profesor'
     elif 'Tesoreria' in grupos:
         template = 'usuarios/dash_tesorero.html'
         rol = 'Tesoreria'
+        
+        # Agregar estadísticas financieras para el dashboard de tesorero
+        total_cuentas = Cuenta.objects.count()
+        cuentas_activas = Cuenta.objects.filter(activa=True).count()
+        saldo_total = sum(cuenta.saldo_actual for cuenta in Cuenta.objects.filter(activa=True))
+        deudas_pendientes = Deuda.objects.filter(estado='PENDIENTE').count()
+        deudas_vencidas = Deuda.objects.filter(estado='VENCIDA').count()
+        
+        context = {
+            'rol': rol,
+            'es_socio': es_socio,
+            'perfil': perfil,
+            'socio': perfil.socio if es_socio else None,
+            'total_cuentas': total_cuentas,
+            'cuentas_activas': cuentas_activas,
+            'saldo_total': saldo_total,
+            'deudas_pendientes': deudas_pendientes,
+            'deudas_vencidas': deudas_vencidas,
+        }
+        return render(request, template, context)
     elif 'Comision' in grupos:
         template = 'usuarios/dash_comision.html'
         rol = 'Comision'
@@ -320,3 +367,51 @@ def asignar_grupo(request):
         return JsonResponse({'success': True, 'message': mensaje})
     except (User.DoesNotExist, Group.DoesNotExist):
         return JsonResponse({'success': False, 'message': 'Usuario o grupo no encontrado'})
+
+@login_required
+@user_passes_test(is_coordinador)
+def dash_coordinador(request):
+    """Dashboard específico para coordinadores con acciones rápidas"""
+    perfil = request.user.perfil
+    
+    # Obtener estadísticas para el coordinador
+    disciplinas_coordinadas = Disciplina.objects.filter(coordinador=perfil, activa=True)
+    disciplinas_count = disciplinas_coordinadas.count()
+    categorias_count = Categoria.objects.filter(disciplina__in=disciplinas_coordinadas).count()
+    total_inscritos = Inscripcion.objects.filter(
+        categoria__disciplina__in=disciplinas_coordinadas,
+        activa=True
+    ).count()
+    
+    # Obtener inscripciones recientes
+    inscripciones_recientes = Inscripcion.objects.filter(
+        categoria__disciplina__in=disciplinas_coordinadas,
+        activa=True
+    ).select_related(
+        'socio__perfil_usuario__usuario',
+        'categoria__disciplina'
+    ).order_by('-fecha_inscripcion')[:5]
+    
+    # Obtener categorías con cupo disponible
+    categorias_con_cupo = []
+    for categoria in Categoria.objects.filter(disciplina__in=disciplinas_coordinadas):
+        inscritos_activos = categoria.inscritos.filter(activa=True).count()
+        cupo_disponible = categoria.cupo_maximo - inscritos_activos
+        if cupo_disponible > 0:
+            categorias_con_cupo.append({
+                'categoria': categoria,
+                'cupo_disponible': cupo_disponible,
+                'inscritos_actuales': inscritos_activos
+            })
+    
+    context = {
+        'perfil': perfil,
+        'disciplinas_count': disciplinas_count,
+        'categorias_count': categorias_count,
+        'total_inscritos': total_inscritos,
+        'inscripciones_recientes': inscripciones_recientes,
+        'categorias_con_cupo': categorias_con_cupo,
+        'disciplinas_coordinadas': disciplinas_coordinadas,
+    }
+    
+    return render(request, 'usuarios/dash_coordinador.html', context)

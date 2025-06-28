@@ -1,12 +1,64 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h2>Bienvenido al Dashboard</h2>
-    <p>Tu rol es: <strong>{{ rol }}</strong></p>
-    <a href="{% url 'usuarios:logout' %}">Cerrar sesión</a>
-</body>
-</html>
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block sidebar_menu %}
+    {% if rol == 'Coordinador' %}
+        {% include 'includes/sidebar_menu_coordinador.html' with request=request %}
+    {% elif rol == 'Tesoreria' %}
+        {% include 'includes/sidebar_menu_tesorero.html' with request=request %}
+    {% elif rol == 'Administrador' %}
+        {% include 'includes/sidebar_menu.html' with request=request %}
+    {% else %}
+        {% include 'includes/sidebar_menu.html' with request=request %}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Dashboard</h1>
+    <p class="subtitle">Bienvenido, {{ user.get_full_name }}</p>
+    
+    {% if rol == 'Coordinador' %}
+        <!-- Estadísticas del Coordinador -->
+        <div class="columns is-multiline">
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Mis Disciplinas</p>
+                    <p class="title">{{ disciplinas_count|default:"0" }}</p>
+                    <p class="help">Disciplinas coordinadas</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Total Inscritos</p>
+                    <p class="title">{{ total_inscritos|default:"0" }}</p>
+                    <p class="help">Deportistas activos</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Categorías Activas</p>
+                    <p class="title">{{ categorias_count|default:"0" }}</p>
+                    <p class="help">Categorías disponibles</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Próximos Eventos</p>
+                    <p class="title">{{ eventos_count|default:"0" }}</p>
+                    <p class="help">Eventos programados</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Dashboard genérico para otros roles -->
+        <div class="box">
+            <h2 class="title is-4">Bienvenido al Sistema</h2>
+            <p>Tu rol es: <strong>{{ rol }}</strong></p>
+            <p>Selecciona una opción del menú lateral para comenzar.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

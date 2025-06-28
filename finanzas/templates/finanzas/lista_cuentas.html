@@ -1,5 +1,5 @@
 {% extends 'usuarios/base_tesorero.html' %}
-
+{% load humanize %}
 {% load static %}
 
 {% block title %}Gestión de Cuentas - Finanzas{% endblock %}
@@ -139,7 +139,7 @@
                             </td>
                             <td>
                                 <span class="has-text-weight-bold {% if cuenta.saldo_actual >= 0 %}has-text-success{% else %}has-text-danger{% endif %}">
-                                    ${{ cuenta.saldo_actual|floatformat:2 }}
+                                    ${{ cuenta.saldo_actual|intcomma }}
                                 </span>
                             </td>
                             <td>
