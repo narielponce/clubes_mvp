@@ -1,0 +1,320 @@
+{% extends 'usuarios/base_tesorero.html' %}
+{% load static %}
+
+{% block title %}Gestión de Deudas - Finanzas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <!-- Header -->
+        <h1 class="title">Gestión de Deudas</h1>
+        <p class="subtitle">Administra las deudas de los socios</p>
+        
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <p class="has-text-grey">Filtra y gestiona todas las deudas del sistema</p>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'finanzas:dashboard' %}" class="button is-light mr-2">
+                        <span class="icon">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+                        <span>Volver</span>
+                    </a>
+                    <a href="{% url 'finanzas:crear_deuda' %}" class="button is-primary mr-2">
+                        <span class="icon">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span>Nueva Deuda</span>
+                    </a>
+                    <a href="{% url 'finanzas:generar_deudas_masivas' %}" class="button is-info">
+                        <span class="icon">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <span>Deudas Masivas</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="box">
+            <form method="get" class="columns is-multiline">
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Estado</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="estado">
+                                    <option value="">Todos los estados</option>
+                                    <option value="PENDIENTE" {% if request.GET.estado == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                                    <option value="PAGADA" {% if request.GET.estado == 'PAGADA' %}selected{% endif %}>Pagada</option>
+                                    <option value="VENCIDA" {% if request.GET.estado == 'VENCIDA' %}selected{% endif %}>Vencida</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Socio</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="socio">
+                                    <option value="">Todos los socios</option>
+                                    {% for socio in socios %}
+                                    <option value="{{ socio.pk }}" {% if request.GET.socio == socio.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ socio.perfil_usuario.usuario.get_full_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Fecha Desde</label>
+                        <div class="control">
+                            <input type="date" name="fecha_desde" class="input" value="{{ request.GET.fecha_desde }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Fecha Hasta</label>
+                        <div class="control">
+                            <input type="date" name="fecha_hasta" class="input" value="{{ request.GET.fecha_hasta }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">&nbsp;</label>
+                        <div class="control">
+                            <button type="submit" class="button is-info is-fullwidth">
+                                <span class="icon">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <span>Filtrar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">&nbsp;</label>
+                        <div class="control">
+                            <a href="{% url 'finanzas:lista_deudas' %}" class="button is-light is-fullwidth">
+                                <span class="icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Limpiar</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de Deudas -->
+        <div class="box">
+            {% if page_obj %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th>Socio</th>
+                            <th>Fecha Vencimiento</th>
+                            <th>Estado</th>
+                            <th>Total</th>
+                            <th>Items</th>
+                            <th>Generada Por</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deuda in page_obj %}
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong>{{ deuda.socio.perfil_usuario.usuario.get_full_name }}</strong>
+                                    <br>
+                                    <small class="has-text-grey">{{ deuda.socio.tipo_socio.nombre }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="{% if deuda.fecha_vencimiento < today %}has-text-danger{% endif %}">
+                                    {{ deuda.fecha_vencimiento|date:"d/m/Y" }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if deuda.estado == 'PENDIENTE' %}
+                                    <span class="tag is-warning">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-clock"></i>
+                                        </span>
+                                        <span>Pendiente</span>
+                                    </span>
+                                {% elif deuda.estado == 'PAGADA' %}
+                                    <span class="tag is-success">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                        <span>Pagada</span>
+                                    </span>
+                                {% elif deuda.estado == 'VENCIDA' %}
+                                    <span class="tag is-danger">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </span>
+                                        <span>Vencida</span>
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="has-text-weight-bold {% if deuda.monto_total >= 0 %}has-text-success{% else %}has-text-danger{% endif %}">
+                                    ${{ deuda.monto_total|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="tag is-info">{{ deuda.items.count }} items</span>
+                            </td>
+                            <td>
+                                <small class="has-text-grey">
+                                    {{ deuda.generada_por.get_full_name }}
+                                    <br>
+                                    {{ deuda.fecha_registro|date:"d/m/Y" }}
+                                </small>
+                            </td>
+                            <td>
+                                <div class="buttons are-small">
+                                    <a href="{% url 'finanzas:editar_deuda' deuda.pk %}" class="button is-info">
+                                        <span class="icon">
+                                            <i class="fas fa-edit"></i>
+                                        </span>
+                                        <span>Editar</span>
+                                    </a>
+                                    <button class="button is-danger" onclick="confirmarEliminar({{ deuda.pk }}, '{{ deuda.socio.perfil_usuario.usuario.get_full_name }}')">
+                                        <span class="icon">
+                                            <i class="fas fa-trash"></i>
+                                        </span>
+                                        <span>Eliminar</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            {% if is_paginated %}
+            <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.socio %}&socio={{ request.GET.socio }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}" class="pagination-previous">Primera</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.socio %}&socio={{ request.GET.socio }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}" class="pagination-previous">Anterior</a>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.socio %}&socio={{ request.GET.socio }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}" class="pagination-next">Siguiente</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.socio %}&socio={{ request.GET.socio }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}" class="pagination-next">Última</a>
+                {% endif %}
+                
+                <ul class="pagination-list">
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li><a class="pagination-link is-current" aria-label="Página {{ num }}" aria-current="page">{{ num }}</a></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li><a href="?page={{ num }}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.socio %}&socio={{ request.GET.socio }}{% endif %}{% if request.GET.fecha_desde %}&fecha_desde={{ request.GET.fecha_desde }}{% endif %}{% if request.GET.fecha_hasta %}&fecha_hasta={{ request.GET.fecha_hasta }}{% endif %}" class="pagination-link" aria-label="Página {{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="has-text-centered py-6">
+                <div class="icon is-large has-text-grey-light">
+                    <i class="fas fa-file-invoice-dollar fa-3x"></i>
+                </div>
+                <p class="title is-4 has-text-grey-light mt-4">No hay deudas registradas</p>
+                <p class="subtitle is-6 has-text-grey-light">Comienza creando tu primera deuda</p>
+                <div class="buttons is-centered mt-4">
+                    <a href="{% url 'finanzas:crear_deuda' %}" class="button is-primary">
+                        <span class="icon">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span>Crear Primera Deuda</span>
+                    </a>
+                    <a href="{% url 'finanzas:generar_deudas_masivas' %}" class="button is-info">
+                        <span class="icon">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <span>Generar Deudas Masivas</span>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div id="modal-eliminar" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Confirmar Eliminación</p>
+            <button class="delete" aria-label="close" onclick="cerrarModal()"></button>
+        </header>
+        <section class="modal-card-body">
+            <p>¿Estás seguro de que quieres eliminar la deuda de <strong id="nombre-socio"></strong>?</p>
+            <p class="has-text-danger mt-3">
+                <span class="icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </span>
+                <span>Esta acción no se puede deshacer.</span>
+            </p>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-danger" id="btn-confirmar-eliminar">Eliminar</button>
+            <button class="button" onclick="cerrarModal()">Cancelar</button>
+        </footer>
+    </div>
+</div>
+
+<script>
+function confirmarEliminar(deudaId, nombreSocio) {
+    document.getElementById('nombre-socio').textContent = nombreSocio;
+    document.getElementById('btn-confirmar-eliminar').onclick = function() {
+        // Aquí iría la lógica para eliminar la deuda
+        // Por ahora solo cerramos el modal
+        cerrarModal();
+    };
+    document.getElementById('modal-eliminar').classList.add('is-active');
+}
+
+function cerrarModal() {
+    document.getElementById('modal-eliminar').classList.remove('is-active');
+}
+
+// Cerrar modal con ESC o click en background
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('modal-eliminar');
+    const modalBackground = modal.querySelector('.modal-background');
+    
+    modalBackground.addEventListener('click', cerrarModal);
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarModal();
+        }
+    });
+});
+</script>
+{% endblock %} 

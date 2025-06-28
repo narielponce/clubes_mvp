@@ -1,0 +1,288 @@
+{% extends 'usuarios/base_tesorero.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">
+        <span class="icon has-text-primary">
+            <i class="fas fa-exchange-alt"></i>
+        </span>
+        {{ titulo }}
+    </h1>
+
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
+                <button class="delete"></button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="columns">
+        <div class="column is-8">
+            <div class="box">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="columns is-multiline">
+                        <!-- Tipo de transacción -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Tipo de Transacción *</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.tipo }}
+                                    </div>
+                                </div>
+                                {% if form.tipo.errors %}
+                                <p class="help is-danger">{{ form.tipo.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Cuenta -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Cuenta *</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.cuenta }}
+                                    </div>
+                                </div>
+                                {% if form.cuenta.errors %}
+                                <p class="help is-danger">{{ form.cuenta.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Categoría -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Categoría *</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.categoria }}
+                                    </div>
+                                </div>
+                                {% if form.categoria.errors %}
+                                <p class="help is-danger">{{ form.categoria.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Monto -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Monto *</label>
+                                <div class="control">
+                                    {{ form.monto }}
+                                </div>
+                                {% if form.monto.errors %}
+                                <p class="help is-danger">{{ form.monto.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Fecha *</label>
+                                <div class="control">
+                                    {{ form.fecha }}
+                                </div>
+                                {% if form.fecha.errors %}
+                                <p class="help is-danger">{{ form.fecha.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Referencia -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Referencia</label>
+                                <div class="control">
+                                    {{ form.referencia }}
+                                </div>
+                                {% if form.referencia.errors %}
+                                <p class="help is-danger">{{ form.referencia.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Deuda relacionada -->
+                        <div class="column is-12">
+                            <div class="field">
+                                <label class="label">Deuda Relacionada (opcional)</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.deuda_relacionada }}
+                                    </div>
+                                </div>
+                                {% if form.deuda_relacionada.errors %}
+                                <p class="help is-danger">{{ form.deuda_relacionada.errors.0 }}</p>
+                                {% endif %}
+                                <p class="help">Selecciona una deuda si esta transacción corresponde a un pago</p>
+                            </div>
+                        </div>
+
+                        <!-- Socio para cuotas -->
+                        <div class="column is-12" id="socio-pago-field" style="display: none;">
+                            <div class="field">
+                                <label class="label">Socio (para cuotas) *</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.socio_pago }}
+                                    </div>
+                                </div>
+                                {% if form.socio_pago.errors %}
+                                <p class="help is-danger">{{ form.socio_pago.errors.0 }}</p>
+                                {% endif %}
+                                <p class="help">Selecciona el socio al cual imputar el pago de cuotas</p>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="column is-12">
+                            <div class="field">
+                                <label class="label">Descripción *</label>
+                                <div class="control">
+                                    {{ form.descripcion }}
+                                </div>
+                                {% if form.descripcion.errors %}
+                                <p class="help is-danger">{{ form.descripcion.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">
+                                <span class="icon is-small">
+                                    <i class="fas fa-save"></i>
+                                </span>
+                                <span>Guardar</span>
+                            </button>
+                        </div>
+                        <div class="control">
+                            <a href="{% url 'finanzas:lista_transacciones' %}" class="button is-light">
+                                <span class="icon is-small">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Cancelar</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Panel lateral con información -->
+        <div class="column is-4">
+            <div class="box">
+                <h3 class="title is-5">
+                    <span class="icon has-text-info">
+                        <i class="fas fa-info-circle"></i>
+                    </span>
+                    Información
+                </h3>
+                
+                <div class="content is-small">
+                    <ul>
+                        <li><strong>Tipo:</strong> Define si es un ingreso o egreso</li>
+                        <li><strong>Cuenta:</strong> Selecciona la cuenta donde se registrará</li>
+                        <li><strong>Categoría:</strong> Clasifica la transacción</li>
+                        <li><strong>Monto:</strong> Cantidad de la transacción</li>
+                        <li><strong>Fecha:</strong> Fecha en que ocurrió</li>
+                        <li><strong>Referencia:</strong> Número de factura, recibo, etc.</li>
+                        <li><strong>Deuda:</strong> Vincula con una deuda específica</li>
+                        <li><strong>Socio:</strong> <span class="has-text-info">Aparece cuando Categoría="Cuotas de Socios" y Tipo="Ingreso"</span></li>
+                    </ul>
+                    
+                    <div class="notification is-info is-light mt-3">
+                        <p class="is-size-7">
+                            <strong>Flujo de Cuotas:</strong> El campo "Socio" aparece automáticamente cuando:
+                            <br>• Categoría = "Cuotas de Socios" 
+                            <br>• Tipo = "Ingreso"
+                            <br><br>
+                            Cuando registres un ingreso por cuotas y selecciones un socio, 
+                            el sistema automáticamente aplicará el pago a las deudas pendientes del socio, 
+                            empezando por las más antiguas.
+                        </p>
+                    </div>
+                </div>
+
+                {% if transaccion %}
+                <hr>
+                <div class="content is-small">
+                    <p><strong>Registrado por:</strong> {{ transaccion.registrado_por.get_full_name }}</p>
+                    <p><strong>Fecha de registro:</strong> {{ transaccion.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                    {% if transaccion.fecha_actualizacion != transaccion.fecha_creacion %}
+                    <p><strong>Última actualización:</strong> {{ transaccion.fecha_actualizacion|date:"d/m/Y H:i" }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Comprobantes -->
+            {% if transaccion and transaccion.comprobantes.exists %}
+            <div class="box mt-4">
+                <h3 class="title is-5">
+                    <span class="icon has-text-success">
+                        <i class="fas fa-file-alt"></i>
+                    </span>
+                    Comprobantes
+                </h3>
+                
+                <div class="content is-small">
+                    {% for comprobante in transaccion.comprobantes.all %}
+                    <div class="box is-small">
+                        <p><strong>{{ comprobante.get_tipo_display }}:</strong> {{ comprobante.numero }}</p>
+                        <p><strong>Fecha:</strong> {{ comprobante.fecha_emision|date:"d/m/Y" }}</p>
+                        <p><strong>Monto:</strong> ${{ comprobante.monto|floatformat:2 }}</p>
+                        {% if comprobante.archivo %}
+                        <a href="{{ comprobante.archivo.url }}" target="_blank" class="button is-small is-info">
+                            <span class="icon is-small">
+                                <i class="fas fa-download"></i>
+                            </span>
+                            <span>Ver archivo</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Mostrar/ocultar campo de socio según la categoría y tipo seleccionados
+document.addEventListener('DOMContentLoaded', function() {
+    const categoriaSelect = document.querySelector('select[name="categoria"]');
+    const tipoSelect = document.querySelector('select[name="tipo"]');
+    const socioPagoField = document.getElementById('socio-pago-field');
+    function toggleSocioField() {
+        const categoria = categoriaSelect ? categoriaSelect.value : '';
+        const tipo = tipoSelect ? tipoSelect.value : '';
+        if (categoria === 'CUOTAS' && tipo === 'INGRESO') {
+            socioPagoField.style.display = 'block';
+        } else {
+            socioPagoField.style.display = 'none';
+        }
+    }
+    // Ejecutar al cargar la página
+    toggleSocioField();
+    // Ejecutar cuando cambie la categoría o el tipo
+    if (categoriaSelect) {
+        categoriaSelect.addEventListener('change', toggleSocioField);
+    }
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', toggleSocioField);
+    }
+});
+</script>
+{% endblock %} 

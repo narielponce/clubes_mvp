@@ -1,0 +1,16 @@
+{% load static %}
+
+<div class="p-3 has-text-centered">
+    <div class="mb-3">
+        <span class="icon is-large has-text-primary">
+            <i class="fas fa-dumbbell fa-2x"></i>
+        </span>
+    </div>
+    <h2 class="title is-5 has-text-primary">Club Los Amigos</h2>
+    <p class="is-size-7 has-text-grey-light">Sistema de Gestión</p>
+</div>
+<ul class="menu-list p-2">
+    <li><a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>Inicio</a></li>
+    <li><a href="{% url 'finanzas:dashboard' %}" {% if '/finanzas' in request.path %}class="is-active"{% endif %}>Finanzas</a></li>
+    <li><a href="#">Documentación</a></li>
+</ul>

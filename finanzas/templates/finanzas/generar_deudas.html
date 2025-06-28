@@ -1,0 +1,336 @@
+{% extends 'usuarios/base_tesorero.html' %}
+{% load static %}
+
+{% block title %}Generar Deudas Masivas - Finanzas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <!-- Header -->
+        <h1 class="title">Generar Deudas Masivas</h1>
+        <p class="subtitle">Crea deudas para múltiples socios de forma masiva</p>
+        
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <p class="has-text-grey">Selecciona los socios y configura las cuotas a generar</p>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'finanzas:dashboard' %}" class="button is-light">
+                        <span class="icon">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+                        <span>Volver</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="columns is-centered">
+            <div class="column is-10">
+                <div class="box">
+                    <form method="post" id="generar-deudas-form">
+                        {% csrf_token %}
+                        
+                        <div class="columns is-multiline">
+                            <!-- Fecha de vencimiento -->
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Fecha de Vencimiento *</label>
+                                    <div class="control has-icons-left">
+                                        {{ form.fecha_vencimiento }}
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                    {% if form.fecha_vencimiento.errors %}
+                                    <p class="help is-danger">{{ form.fecha_vencimiento.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Fecha límite para el pago de las cuotas</p>
+                                </div>
+                            </div>
+
+                            <!-- Cuota societaria -->
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Cuota Societaria</label>
+                                    <div class="control has-icons-left">
+                                        {{ form.cuota_societaria }}
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </span>
+                                    </div>
+                                    {% if form.cuota_societaria.errors %}
+                                    <p class="help is-danger">{{ form.cuota_societaria.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Monto de la cuota societaria (opcional)</p>
+                                </div>
+                            </div>
+
+                            <!-- Incluir disciplinas -->
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Incluir Disciplinas</label>
+                                    <div class="control">
+                                        <label class="checkbox">
+                                            {{ form.incluir_disciplinas }}
+                                            <span class="ml-2">Generar cuotas por disciplinas practicadas</span>
+                                        </label>
+                                    </div>
+                                    {% if form.incluir_disciplinas.errors %}
+                                    <p class="help is-danger">{{ form.incluir_disciplinas.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Se generarán cuotas basadas en las disciplinas de cada socio</p>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="column is-12">
+                                <div class="field">
+                                    <label class="label">Observaciones</label>
+                                    <div class="control">
+                                        {{ form.observaciones }}
+                                    </div>
+                                    {% if form.observaciones.errors %}
+                                    <p class="help is-danger">{{ form.observaciones.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Observaciones que se aplicarán a todas las deudas generadas</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selección de socios -->
+                        <div class="field">
+                            <label class="label">Seleccionar Socios *</label>
+                            <div class="control">
+                                <div class="notification is-info is-light mb-3">
+                                    <p class="is-size-7">
+                                        <span class="icon">
+                                            <i class="fas fa-info-circle"></i>
+                                        </span>
+                                        <span>Selecciona los socios para los cuales generar deudas. Puedes usar los filtros para facilitar la selección.</span>
+                                    </p>
+                                </div>
+                                
+                                <!-- Filtros rápidos -->
+                                <div class="field has-addons mb-3">
+                                    <div class="control">
+                                        <button type="button" class="button is-small" onclick="seleccionarTodos()">
+                                            <span class="icon is-small">
+                                                <i class="fas fa-check-double"></i>
+                                            </span>
+                                            <span>Seleccionar Todos</span>
+                                        </button>
+                                    </div>
+                                    <div class="control">
+                                        <button type="button" class="button is-small" onclick="deseleccionarTodos()">
+                                            <span class="icon is-small">
+                                                <i class="fas fa-times"></i>
+                                            </span>
+                                            <span>Deseleccionar Todos</span>
+                                        </button>
+                                    </div>
+                                    <div class="control">
+                                        <button type="button" class="button is-small" onclick="seleccionarActivos()">
+                                            <span class="icon is-small">
+                                                <i class="fas fa-user-check"></i>
+                                            </span>
+                                            <span>Solo Activos</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Lista de socios -->
+                                <div class="box" style="max-height: 400px; overflow-y: auto;">
+                                    {% if form.socios.errors %}
+                                    <p class="help is-danger mb-3">{{ form.socios.errors.0 }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="columns is-multiline">
+                                        {% for socio in form.socios %}
+                                        <div class="column is-6">
+                                            <label class="checkbox">
+                                                {{ socio.tag }}
+                                                <span class="ml-2">
+                                                    <strong>{{ socio.choice_label }}</strong>
+                                                    <br>
+                                                    <small class="has-text-grey">
+                                                        {% if socio.data.instance.perfil_usuario %}
+                                                            {{ socio.data.instance.tipo_socio.nombre }} - 
+                                                            {{ socio.data.instance.fecha_afiliacion|date:"d/m/Y" }}
+                                                        {% else %}
+                                                            Socio sin perfil
+                                                        {% endif %}
+                                                    </small>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <p class="help mt-2">
+                                    <span id="socios-seleccionados">0</span> socios seleccionados de {{ form.socios.queryset.count }} total
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Resumen -->
+                        <div class="notification is-warning is-light">
+                            <div class="content">
+                                <h4 class="title is-6">
+                                    <span class="icon">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </span>
+                                    Resumen de la operación
+                                </h4>
+                                <ul>
+                                    <li><strong>Socios seleccionados:</strong> <span id="resumen-socios">0</span></li>
+                                    <li><strong>Cuota societaria:</strong> $<span id="resumen-cuota">0,00</span></li>
+                                    <li><strong>Incluir disciplinas:</strong> <span id="resumen-disciplinas">No</span></li>
+                                    <li><strong>Total estimado por socio:</strong> $<span id="resumen-total">0,00</span></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="field is-grouped is-grouped-right">
+                            <p class="control">
+                                <a href="{% url 'finanzas:dashboard' %}" class="button is-light">
+                                    <span class="icon">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                    <span>Cancelar</span>
+                                </a>
+                            </p>
+                            <p class="control">
+                                <button type="submit" class="button is-primary" id="btn-generar">
+                                    <span class="icon">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </span>
+                                    <span>Generar Deudas</span>
+                                </button>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="notification is-info is-light">
+                    <div class="content">
+                        <h4 class="title is-6">
+                            <span class="icon">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                            Información sobre deudas masivas
+                        </h4>
+                        <ul>
+                            <li><strong>Cuota Societaria:</strong> Se aplicará a todos los socios seleccionados</li>
+                            <li><strong>Disciplinas:</strong> Se generarán cuotas basadas en las disciplinas que practica cada socio</li>
+                            <li><strong>Fecha de Vencimiento:</strong> Se aplicará a todas las deudas generadas</li>
+                            <li><strong>Observaciones:</strong> Se copiarán a todas las deudas generadas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('generar-deudas-form');
+    const cuotaInput = document.querySelector('input[name="cuota_societaria"]');
+    const incluirDisciplinasCheckbox = document.querySelector('input[name="incluir_disciplinas"]');
+    const sociosCheckboxes = document.querySelectorAll('input[name="socios"]');
+    const btnGenerar = document.getElementById('btn-generar');
+    
+    // Formatear cuota al escribir
+    cuotaInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^\d.-]/g, '');
+        if (value && !isNaN(value)) {
+            e.target.value = parseFloat(value).toFixed(2);
+        }
+        actualizarResumen();
+    });
+    
+    // Actualizar resumen cuando cambien las opciones
+    incluirDisciplinasCheckbox.addEventListener('change', actualizarResumen);
+    sociosCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', actualizarResumen);
+    });
+    
+    // Funciones de selección
+    window.seleccionarTodos = function() {
+        sociosCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        actualizarResumen();
+    };
+    
+    window.deseleccionarTodos = function() {
+        sociosCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        actualizarResumen();
+    };
+    
+    window.seleccionarActivos = function() {
+        sociosCheckboxes.forEach(checkbox => {
+            // Aquí podrías agregar lógica para identificar socios activos
+            checkbox.checked = true;
+        });
+        actualizarResumen();
+    };
+    
+    function actualizarResumen() {
+        const sociosSeleccionados = document.querySelectorAll('input[name="socios"]:checked').length;
+        const cuotaSocietaria = parseFloat(cuotaInput.value) || 0;
+        const incluirDisciplinas = incluirDisciplinasCheckbox.checked;
+        
+        // Actualizar contadores
+        document.getElementById('socios-seleccionados').textContent = sociosSeleccionados;
+        document.getElementById('resumen-socios').textContent = sociosSeleccionados;
+        document.getElementById('resumen-cuota').textContent = cuotaSocietaria.toFixed(2).replace('.', ',');
+        document.getElementById('resumen-disciplinas').textContent = incluirDisciplinas ? 'Sí' : 'No';
+        
+        // Calcular total estimado (cuota societaria + estimado de disciplinas)
+        const estimadoDisciplinas = incluirDisciplinas ? 5000 : 0; // Estimado promedio
+        const totalPorSocio = cuotaSocietaria + estimadoDisciplinas;
+        document.getElementById('resumen-total').textContent = totalPorSocio.toFixed(2).replace('.', ',');
+        
+        // Habilitar/deshabilitar botón
+        btnGenerar.disabled = sociosSeleccionados === 0;
+    }
+    
+    // Validación del formulario
+    form.addEventListener('submit', function(e) {
+        const sociosSeleccionados = document.querySelectorAll('input[name="socios"]:checked').length;
+        const fechaVencimiento = document.querySelector('input[name="fecha_vencimiento"]').value;
+        
+        if (sociosSeleccionados === 0) {
+            e.preventDefault();
+            alert('Debe seleccionar al menos un socio.');
+            return;
+        }
+        
+        if (!fechaVencimiento) {
+            e.preventDefault();
+            alert('Debe especificar una fecha de vencimiento.');
+            return;
+        }
+        
+        // Confirmación final
+        if (!confirm(`¿Está seguro de que desea generar ${sociosSeleccionados} deudas? Esta acción no se puede deshacer.`)) {
+            e.preventDefault();
+        }
+    });
+    
+    // Inicializar resumen
+    actualizarResumen();
+});
+</script>
+{% endblock %} 

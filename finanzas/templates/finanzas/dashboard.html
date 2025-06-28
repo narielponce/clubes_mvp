@@ -1,0 +1,170 @@
+{% extends 'usuarios/base_tesorero.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+    <h1 class="title">
+        <span class="icon has-text-primary">
+            <i class="fas fa-chart-line"></i>
+        </span>
+        Gestión Financiera
+    </h1>
+
+    <!-- Acciones rápidas -->
+    <div class="columns is-multiline mb-5">
+        <div class="column is-3">
+            <a href="{% url 'finanzas:crear_transaccion' %}" class="button is-primary is-fullwidth">
+                <span class="icon">
+                    <i class="fas fa-plus-circle"></i>
+                </span>
+                <span>Nueva Transacción</span>
+            </a>
+        </div>
+        
+        <!--<div class="column is-3">
+            <a href="{% url 'finanzas:crear_deuda' %}" class="button is-warning is-fullwidth">
+                <span class="icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </span>
+                <span>Crear Deuda</span>
+            </a>
+        </div>-->
+        
+        <div class="column is-3">
+            <a href="{% url 'finanzas:generar_deudas_masivas' %}" class="button is-info is-fullwidth">
+                <span class="icon">
+                    <i class="fas fa-users"></i>
+                </span>
+                <span>Deudas Masivas</span>
+            </a>
+        </div>
+        
+        <!--<div class="column is-3">
+            <a href="{% url 'finanzas:crear_cuenta' %}" class="button is-success is-fullwidth">
+                <span class="icon">
+                    <i class="fas fa-university"></i>
+                </span>
+                <span>Nueva Cuenta</span>
+            </a>
+        </div>-->
+        
+        <div class="column is-3">
+            <a href="{% url 'finanzas:lista_cuentas' %}" class="button is-link is-fullwidth">
+                <span class="icon">
+                    <i class="fas fa-list"></i>
+                </span>
+                <span>Gestión de Cuentas</span>
+            </a>
+        </div>
+        
+        <div class="column is-3">
+            <a href="{% url 'finanzas:lista_transacciones' %}" class="button is-dark is-fullwidth">
+                <span class="icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </span>
+                <span>Ver Transacciones</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Resumen del mes -->
+    <div class="columns is-multiline mb-5">
+        <!-- Ingresos del mes -->
+        <div class="column is-6">
+            <div class="box">
+                <h3 class="title is-5">
+                    <span class="icon has-text-success">
+                        <i class="fas fa-arrow-up"></i>
+                    </span>
+                    Ingresos del Mes
+                </h3>
+                <div class="has-text-centered">
+                    <p class="title is-2 has-text-success">${{ ingresos_mes|intcomma }}</p>
+                    <p class="is-size-7 has-text-grey-light">Total de ingresos registrados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Egresos del mes -->
+        <div class="column is-6">
+            <div class="box">
+                <h3 class="title is-5">
+                    <span class="icon has-text-danger">
+                        <i class="fas fa-arrow-down"></i>
+                    </span>
+                    Egresos del Mes
+                </h3>
+                <div class="has-text-centered">
+                    <p class="title is-2 has-text-danger">${{ egresos_mes|intcomma }}</p>
+                    <p class="is-size-7 has-text-grey-light">Total de egresos registrados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimas transacciones -->
+    <div class="box">
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h3 class="title is-5">
+                        <span class="icon has-text-info">
+                            <i class="fas fa-history"></i>
+                        </span>
+                        Últimas Transacciones
+                    </h3>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'finanzas:lista_transacciones' %}" class="button is-small is-info">
+                        <span class="icon is-small">
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                        <span>Ver todas</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        {% if ultimas_transacciones %}
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Cuenta</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaccion in ultimas_transacciones %}
+                    <tr>
+                        <td>{{ transaccion.fecha|date:"d/m/Y" }}</td>
+                        <td>
+                            <span class="tag {% if transaccion.tipo == 'INGRESO' %}is-success{% else %}is-danger{% endif %}">
+                                {{ transaccion.get_tipo_display }}
+                            </span>
+                        </td>
+                        <td>{{ transaccion.cuenta.nombre }}</td>
+                        <td>{{ transaccion.descripcion|truncatechars:50 }}</td>
+                        <td class="has-text-weight-bold {% if transaccion.tipo == 'INGRESO' %}has-text-success{% else %}has-text-danger{% endif %}">
+                            ${{ transaccion.monto|intcomma }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="has-text-centered py-6">
+            <span class="icon is-large has-text-grey-light">
+                <i class="fas fa-inbox fa-3x"></i>
+            </span>
+            <p class="has-text-grey-light mt-3">No hay transacciones registradas</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

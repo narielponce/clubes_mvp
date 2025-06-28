@@ -1,0 +1,234 @@
+{% extends 'usuarios/base_tesorero.html' %}
+
+{% load static %}
+
+{% block title %}Gestión de Cuentas - Finanzas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <!-- Header -->
+        <h1 class="title">Gestión de Cuentas</h1>
+        <p class="subtitle">Administra las cuentas bancarias y de efectivo</p>
+        
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <p class="has-text-grey">Filtra y gestiona todas las cuentas del sistema</p>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'finanzas:dashboard' %}" class="button is-light mr-2">
+                        <span class="icon">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+                        <span>Volver</span>
+                    </a>
+                    <a href="{% url 'finanzas:crear_cuenta' %}" class="button is-primary">
+                        <span class="icon">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                        <span>Nueva Cuenta</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="box">
+            <form method="get" class="columns is-multiline">
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Tipo de Cuenta</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="tipo">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="EFECTIVO" {% if request.GET.tipo == 'EFECTIVO' %}selected{% endif %}>Efectivo</option>
+                                    <option value="BANCO" {% if request.GET.tipo == 'BANCO' %}selected{% endif %}>Banco</option>
+                                    <option value="BILLETERA_VIRTUAL" {% if request.GET.tipo == 'BILLETERA_VIRTUAL' %}selected{% endif %}>Billetera Virtual</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">Estado</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="activa">
+                                    <option value="">Todos</option>
+                                    <option value="1" {% if request.GET.activa == '1' %}selected{% endif %}>Activa</option>
+                                    <option value="0" {% if request.GET.activa == '0' %}selected{% endif %}>Inactiva</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">&nbsp;</label>
+                        <div class="control">
+                            <button type="submit" class="button is-info is-fullwidth">
+                                <span class="icon">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <span>Filtrar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label is-small">&nbsp;</label>
+                        <div class="control">
+                            <a href="{% url 'finanzas:lista_cuentas' %}" class="button is-light is-fullwidth">
+                                <span class="icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Limpiar</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de Cuentas -->
+        <div class="box">
+            {% if cuentas %}
+            <div class="table-container">
+                <table class="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Saldo Actual</th>
+                            <th>Estado</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cuenta in cuentas %}
+                        <tr>
+                            <td>
+                                <strong>{{ cuenta.nombre }}</strong>
+                            </td>
+                            <td>
+                                <span class="tag is-info">
+                                    {% if cuenta.tipo == 'EFECTIVO' %}
+                                        <span class="icon is-small">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </span>
+                                        <span>Efectivo</span>
+                                    {% elif cuenta.tipo == 'BANCO' %}
+                                        <span class="icon is-small">
+                                            <i class="fas fa-university"></i>
+                                        </span>
+                                        <span>Banco</span>
+                                    {% elif cuenta.tipo == 'BILLETERA_VIRTUAL' %}
+                                        <span class="icon is-small">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </span>
+                                        <span>Billetera Virtual</span>
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="has-text-weight-bold {% if cuenta.saldo_actual >= 0 %}has-text-success{% else %}has-text-danger{% endif %}">
+                                    ${{ cuenta.saldo_actual|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if cuenta.activa %}
+                                    <span class="tag is-success">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                        <span>Activa</span>
+                                    </span>
+                                {% else %}
+                                    <span class="tag is-danger">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-times"></i>
+                                        </span>
+                                        <span>Inactiva</span>
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if cuenta.descripcion %}
+                                    <span class="has-text-grey">{{ cuenta.descripcion|truncatechars:50 }}</span>
+                                {% else %}
+                                    <span class="has-text-grey-light">Sin descripción</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="buttons are-small">
+                                    <a href="{% url 'finanzas:editar_cuenta' cuenta.pk %}" class="button is-info">
+                                        <span class="icon">
+                                            <i class="fas fa-edit"></i>
+                                        </span>
+                                        <span>Editar</span>
+                                    </a>
+                                    <a href="{% url 'finanzas:eliminar_cuenta' cuenta.pk %}" class="button is-danger">
+                                        <span class="icon">
+                                            <i class="fas fa-trash"></i>
+                                        </span>
+                                        <span>Eliminar</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            {% if is_paginated %}
+            <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.activa %}&activa={{ request.GET.activa }}{% endif %}" class="pagination-previous">Primera</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.activa %}&activa={{ request.GET.activa }}{% endif %}" class="pagination-previous">Anterior</a>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.activa %}&activa={{ request.GET.activa }}{% endif %}" class="pagination-next">Siguiente</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.activa %}&activa={{ request.GET.activa }}{% endif %}" class="pagination-next">Última</a>
+                {% endif %}
+                
+                <ul class="pagination-list">
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li><a class="pagination-link is-current" aria-label="Página {{ num }}" aria-current="page">{{ num }}</a></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li><a href="?page={{ num }}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.activa %}&activa={{ request.GET.activa }}{% endif %}" class="pagination-link" aria-label="Página {{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="has-text-centered py-6">
+                <div class="icon is-large has-text-grey-light">
+                    <i class="fas fa-piggy-bank fa-3x"></i>
+                </div>
+                <p class="title is-4 has-text-grey-light mt-4">No hay cuentas registradas</p>
+                <p class="subtitle is-6 has-text-grey-light">Comienza creando tu primera cuenta</p>
+                <a href="{% url 'finanzas:crear_cuenta' %}" class="button is-primary mt-4">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Crear Primera Cuenta</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

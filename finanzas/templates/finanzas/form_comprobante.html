@@ -1,0 +1,227 @@
+{% extends 'usuarios/base_tesorero.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">
+        <span class="icon has-text-primary">
+            <i class="fas fa-file-upload"></i>
+        </span>
+        {{ titulo }}
+    </h1>
+
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
+                <button class="delete"></button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="columns">
+        <div class="column is-8">
+            <div class="box">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="columns is-multiline">
+                        <!-- Tipo de comprobante -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Tipo de Comprobante *</label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        {{ form.tipo }}
+                                    </div>
+                                </div>
+                                {% if form.tipo.errors %}
+                                <p class="help is-danger">{{ form.tipo.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Número -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Número *</label>
+                                <div class="control">
+                                    {{ form.numero }}
+                                </div>
+                                {% if form.numero.errors %}
+                                <p class="help is-danger">{{ form.numero.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Fecha de emisión -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Fecha de Emisión *</label>
+                                <div class="control">
+                                    {{ form.fecha_emision }}
+                                </div>
+                                {% if form.fecha_emision.errors %}
+                                <p class="help is-danger">{{ form.fecha_emision.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Monto -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label">Monto *</label>
+                                <div class="control">
+                                    {{ form.monto }}
+                                </div>
+                                {% if form.monto.errors %}
+                                <p class="help is-danger">{{ form.monto.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Archivo -->
+                        <div class="column is-12">
+                            <div class="field">
+                                <label class="label">Archivo (opcional)</label>
+                                <div class="control">
+                                    <div class="file has-name is-fullwidth">
+                                        <label class="file-label">
+                                            {{ form.archivo }}
+                                            <span class="file-cta">
+                                                <span class="file-icon">
+                                                    <i class="fas fa-upload"></i>
+                                                </span>
+                                                <span class="file-label">
+                                                    Elegir archivo...
+                                                </span>
+                                            </span>
+                                            <span class="file-name" id="file-name">
+                                                No se ha seleccionado ningún archivo
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% if form.archivo.errors %}
+                                <p class="help is-danger">{{ form.archivo.errors.0 }}</p>
+                                {% endif %}
+                                <p class="help">Formatos permitidos: PDF, JPG, PNG. Máximo 10MB.</p>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="column is-12">
+                            <div class="field">
+                                <label class="label">Descripción</label>
+                                <div class="control">
+                                    {{ form.descripcion }}
+                                </div>
+                                {% if form.descripcion.errors %}
+                                <p class="help is-danger">{{ form.descripcion.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">
+                                <span class="icon is-small">
+                                    <i class="fas fa-save"></i>
+                                </span>
+                                <span>Guardar Comprobante</span>
+                            </button>
+                        </div>
+                        <div class="control">
+                            <a href="{% url 'finanzas:lista_transacciones' %}" class="button is-light">
+                                <span class="icon is-small">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Cancelar</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Panel lateral con información -->
+        <div class="column is-4">
+            <div class="box">
+                <h3 class="title is-5">
+                    <span class="icon has-text-info">
+                        <i class="fas fa-info-circle"></i>
+                    </span>
+                    Información de la Transacción
+                </h3>
+                
+                <div class="content is-small">
+                    <p><strong>Fecha:</strong> {{ transaccion.fecha|date:"d/m/Y" }}</p>
+                    <p><strong>Tipo:</strong> 
+                        <span class="tag {% if transaccion.tipo == 'INGRESO' %}is-success{% else %}is-danger{% endif %}">
+                            {{ transaccion.get_tipo_display }}
+                        </span>
+                    </p>
+                    <p><strong>Cuenta:</strong> {{ transaccion.cuenta.nombre }}</p>
+                    <p><strong>Categoría:</strong> {{ transaccion.get_categoria_display }}</p>
+                    <p><strong>Monto:</strong> 
+                        <span class="has-text-weight-bold {% if transaccion.tipo == 'INGRESO' %}has-text-success{% else %}has-text-danger{% endif %}">
+                            ${{ transaccion.monto|floatformat:2 }}
+                        </span>
+                    </p>
+                    <p><strong>Descripción:</strong> {{ transaccion.descripcion|truncatechars:100 }}</p>
+                </div>
+            </div>
+
+            <!-- Comprobantes existentes -->
+            {% if transaccion.comprobantes.exists %}
+            <div class="box mt-4">
+                <h3 class="title is-5">
+                    <span class="icon has-text-success">
+                        <i class="fas fa-file-alt"></i>
+                    </span>
+                    Comprobantes Existentes
+                </h3>
+                
+                <div class="content is-small">
+                    {% for comprobante in transaccion.comprobantes.all %}
+                    <div class="box is-small">
+                        <p><strong>{{ comprobante.get_tipo_display }}:</strong> {{ comprobante.numero }}</p>
+                        <p><strong>Fecha:</strong> {{ comprobante.fecha_emision|date:"d/m/Y" }}</p>
+                        <p><strong>Monto:</strong> ${{ comprobante.monto|floatformat:2 }}</p>
+                        {% if comprobante.archivo %}
+                        <a href="{{ comprobante.archivo.url }}" target="_blank" class="button is-small is-info">
+                            <span class="icon is-small">
+                                <i class="fas fa-download"></i>
+                            </span>
+                            <span>Ver archivo</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Mostrar nombre del archivo seleccionado
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileName = document.getElementById('file-name');
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileName.textContent = this.files[0].name;
+            } else {
+                fileName.textContent = 'No se ha seleccionado ningún archivo';
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,227 @@
+{% extends 'usuarios/base_tesorero.html' %}
+
+{% load static %}
+
+{% block title %}{{ titulo }} - Finanzas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <!-- Header -->
+        <h1 class="title">{{ titulo }}</h1>
+        <p class="subtitle">
+            {% if cuenta %}
+                Editando cuenta: {{ cuenta.nombre }}
+            {% else %}
+                Crea una nueva cuenta bancaria o de efectivo
+            {% endif %}
+        </p>
+        
+        <div class="level mb-5">
+            <div class="level-left">
+                <div class="level-item">
+                    <p class="has-text-grey">
+                        {% if cuenta %}
+                            Modifica los datos de la cuenta seleccionada
+                        {% else %}
+                            Completa los datos para crear una nueva cuenta
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'finanzas:lista_cuentas' %}" class="button is-light">
+                        <span class="icon">
+                            <i class="fas fa-arrow-left"></i>
+                        </span>
+                        <span>Volver</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="columns is-centered">
+            <div class="column is-8">
+                <div class="box">
+                    <form method="post" id="cuenta-form">
+                        {% csrf_token %}
+                        
+                        <div class="columns is-multiline">
+                            <!-- Nombre de la cuenta -->
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Nombre de la Cuenta *</label>
+                                    <div class="control has-icons-left">
+                                        {{ form.nombre }}
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-piggy-bank"></i>
+                                        </span>
+                                    </div>
+                                    {% if form.nombre.errors %}
+                                    <p class="help is-danger">{{ form.nombre.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Ej: Caja Principal, Banco Nación, Mercado Pago</p>
+                                </div>
+                            </div>
+
+                            <!-- Tipo de cuenta -->
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Tipo de Cuenta *</label>
+                                    <div class="control has-icons-left">
+                                        {{ form.tipo }}
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-university"></i>
+                                        </span>
+                                    </div>
+                                    {% if form.tipo.errors %}
+                                    <p class="help is-danger">{{ form.tipo.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Saldo actual -->
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Saldo Actual *</label>
+                                    <div class="control has-icons-left">
+                                        {{ form.saldo_actual }}
+                                        <span class="icon is-small is-left">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </span>
+                                    </div>
+                                    {% if form.saldo_actual.errors %}
+                                    <p class="help is-danger">{{ form.saldo_actual.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Saldo actual de la cuenta (puede ser negativo)</p>
+                                </div>
+                            </div>
+
+                            <!-- Estado -->
+                            <div class="column is-6">
+                                <div class="field">
+                                    <label class="label">Estado</label>
+                                    <div class="control">
+                                        <label class="checkbox">
+                                            {{ form.activa }}
+                                            <span class="ml-2">Cuenta activa</span>
+                                        </label>
+                                    </div>
+                                    {% if form.activa.errors %}
+                                    <p class="help is-danger">{{ form.activa.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Las cuentas inactivas no aparecen en transacciones</p>
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="column is-12">
+                                <div class="field">
+                                    <label class="label">Descripción</label>
+                                    <div class="control">
+                                        {{ form.descripcion }}
+                                    </div>
+                                    {% if form.descripcion.errors %}
+                                    <p class="help is-danger">{{ form.descripcion.errors.0 }}</p>
+                                    {% endif %}
+                                    <p class="help">Información adicional sobre la cuenta (opcional)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="field is-grouped is-grouped-right">
+                            <p class="control">
+                                <a href="{% url 'finanzas:lista_cuentas' %}" class="button is-light">
+                                    <span class="icon">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                    <span>Cancelar</span>
+                                </a>
+                            </p>
+                            <p class="control">
+                                <button type="submit" class="button is-primary">
+                                    <span class="icon">
+                                        <i class="fas fa-save"></i>
+                                    </span>
+                                    <span>
+                                        {% if cuenta %}
+                                            Actualizar Cuenta
+                                        {% else %}
+                                            Crear Cuenta
+                                        {% endif %}
+                                    </span>
+                                </button>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="notification is-info is-light">
+                    <div class="content">
+                        <h4 class="title is-6">
+                            <span class="icon">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                            Información sobre tipos de cuenta
+                        </h4>
+                        <ul>
+                            <li><strong>Efectivo:</strong> Para dinero en efectivo, caja chica, etc.</li>
+                            <li><strong>Banco:</strong> Para cuentas bancarias, cajas de ahorro, cuentas corrientes</li>
+                            <li><strong>Billetera Virtual:</strong> Para Mercado Pago, Ualá, Naranja X, etc.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('cuenta-form');
+    const saldoInput = document.querySelector('input[name="saldo_actual"]');
+    
+    // Formatear saldo al escribir
+    saldoInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/[^\d.-]/g, '');
+        if (value && !isNaN(value)) {
+            e.target.value = parseFloat(value).toFixed(2);
+        }
+    });
+    
+    // Validación del formulario
+    form.addEventListener('submit', function(e) {
+        const nombre = document.querySelector('input[name="nombre"]').value.trim();
+        const tipo = document.querySelector('select[name="tipo"]').value;
+        const saldo = document.querySelector('input[name="saldo_actual"]').value;
+        
+        let isValid = true;
+        let errorMessage = '';
+        
+        if (!nombre) {
+            errorMessage += 'El nombre de la cuenta es obligatorio.\n';
+            isValid = false;
+        }
+        
+        if (!tipo) {
+            errorMessage += 'Debe seleccionar un tipo de cuenta.\n';
+            isValid = false;
+        }
+        
+        if (!saldo || isNaN(saldo)) {
+            errorMessage += 'El saldo debe ser un número válido.\n';
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor corrija los siguientes errores:\n\n' + errorMessage);
+        }
+    });
+});
+</script>
+{% endblock %} 

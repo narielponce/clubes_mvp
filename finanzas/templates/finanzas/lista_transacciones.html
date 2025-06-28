@@ -1,0 +1,220 @@
+{% extends 'usuarios/base_tesorero.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+    <h1 class="title">
+        <span class="icon has-text-primary">
+            <i class="fas fa-exchange-alt"></i>
+        </span>
+        Transacciones
+    </h1>
+
+    <!-- Mensajes de éxito/error -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="notification {% if message.tags == 'error' %}is-danger{% elif message.tags == 'warning' %}is-warning{% else %}is-success{% endif %} is-light">
+                <button class="delete"></button>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Botón para nueva transacción -->
+    <div class="columns is-mobile mb-4">
+        <div class="column">
+            <a href="{% url 'finanzas:crear_transaccion' %}" class="button is-primary">
+                <span class="icon is-small">
+                    <i class="fas fa-plus"></i>
+                </span>
+                <span>Nueva Transacción</span>
+            </a>
+            <a href="{% url 'finanzas:dashboard' %}" class="button is-light">
+                <span class="icon is-small">
+                    <i class="fas fa-arrow-left"></i>
+                </span>
+                <span>Volver al Dashboard</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="box mb-4">
+        <h3 class="title is-6">Filtros</h3>
+        <form method="get" class="columns is-multiline">
+            <div class="column is-2">
+                <div class="field">
+                    <label class="label is-small">Tipo</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="tipo">
+                                <option value="">Todos</option>
+                                <option value="INGRESO" {% if tipo_filtro == 'INGRESO' %}selected{% endif %}>Ingreso</option>
+                                <option value="EGRESO" {% if tipo_filtro == 'EGRESO' %}selected{% endif %}>Egreso</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="field">
+                    <label class="label is-small">Cuenta</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="cuenta">
+                                <option value="">Todas</option>
+                                {% for cuenta in cuentas %}
+                                <option value="{{ cuenta.id }}" {% if cuenta_filtro == cuenta.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ cuenta.nombre }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <div class="field">
+                    <label class="label is-small">Desde</label>
+                    <div class="control">
+                        <input class="input is-small" type="date" name="fecha_desde" value="{{ fecha_desde_filtro }}">
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2">
+                <div class="field">
+                    <label class="label is-small">Hasta</label>
+                    <div class="control">
+                        <input class="input is-small" type="date" name="fecha_hasta" value="{{ fecha_hasta_filtro }}">
+                    </div>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="field">
+                    <label class="label is-small">&nbsp;</label>
+                    <div class="control">
+                        <button type="submit" class="button is-info is-small">
+                            <span class="icon is-small">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <span>Filtrar</span>
+                        </button>
+                        <a href="{% url 'finanzas:lista_transacciones' %}" class="button is-small">
+                            <span class="icon is-small">
+                                <i class="fas fa-times"></i>
+                            </span>
+                            <span>Limpiar</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de transacciones -->
+    <div class="table-container">
+        <table class="table is-fullwidth is-striped">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Cuenta</th>
+                    <th>Categoría</th>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                    <th>Registrado por</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaccion in page_obj %}
+                <tr>
+                    <td>{{ transaccion.fecha|date:"d/m/Y" }}</td>
+                    <td>
+                        <span class="tag {% if transaccion.tipo == 'INGRESO' %}is-success{% else %}is-danger{% endif %}">
+                            {{ transaccion.get_tipo_display }}
+                        </span>
+                    </td>
+                    <td>{{ transaccion.cuenta.nombre }}</td>
+                    <td>{{ transaccion.get_categoria_display }}</td>
+                    <td>{{ transaccion.descripcion|truncatechars:50 }}</td>
+                    <td class="has-text-weight-bold {% if transaccion.tipo == 'INGRESO' %}has-text-success{% else %}has-text-danger{% endif %}">
+                        ${{ transaccion.monto|intcomma }}
+                    </td>
+                    <td>{{ transaccion.registrado_por.get_full_name }}</td>
+                    <td>
+                        <div class="buttons are-small">
+                            <a href="{% url 'finanzas:editar_transaccion' transaccion.pk %}" class="button is-small is-warning">
+                                <span class="icon is-small">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                            </a>
+                            {% if transaccion.comprobantes.count == 0 %}
+                            <a href="{% url 'finanzas:agregar_comprobante' transaccion.pk %}" class="button is-small is-info">
+                                <span class="icon is-small">
+                                    <i class="fas fa-file-upload"></i>
+                                </span>
+                            </a>
+                            {% else %}
+                            <span class="tag is-success is-small">
+                                <span class="icon is-small">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span>{{ transaccion.comprobantes.count }}</span>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="has-text-centered">
+                        <div class="py-6">
+                            <span class="icon is-large has-text-grey-light">
+                                <i class="fas fa-inbox fa-3x"></i>
+                            </span>
+                            <p class="has-text-grey-light mt-3">No hay transacciones registradas</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if page_obj.has_other_pages %}
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+        {% if page_obj.has_previous %}
+        <a class="pagination-previous" href="?page={{ page_obj.previous_page_number }}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if cuenta_filtro %}&cuenta={{ cuenta_filtro }}{% endif %}{% if fecha_desde_filtro %}&fecha_desde={{ fecha_desde_filtro }}{% endif %}{% if fecha_hasta_filtro %}&fecha_hasta={{ fecha_hasta_filtro }}{% endif %}">
+            Anterior
+        </a>
+        {% endif %}
+        
+        {% if page_obj.has_next %}
+        <a class="pagination-next" href="?page={{ page_obj.next_page_number }}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if cuenta_filtro %}&cuenta={{ cuenta_filtro }}{% endif %}{% if fecha_desde_filtro %}&fecha_desde={{ fecha_desde_filtro }}{% endif %}{% if fecha_hasta_filtro %}&fecha_hasta={{ fecha_hasta_filtro }}{% endif %}">
+            Siguiente
+        </a>
+        {% endif %}
+
+        <ul class="pagination-list">
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li><a class="pagination-link is-current" aria-label="Página {{ num }}" aria-current="page">{{ num }}</a></li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li><a class="pagination-link" aria-label="Página {{ num }}" href="?page={{ num }}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}{% if cuenta_filtro %}&cuenta={{ cuenta_filtro }}{% endif %}{% if fecha_desde_filtro %}&fecha_desde={{ fecha_desde_filtro }}{% endif %}{% if fecha_hasta_filtro %}&fecha_hasta={{ fecha_hasta_filtro }}{% endif %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    <!-- Información de paginación -->
+    {% if page_obj %}
+    <div class="has-text-centered mt-4">
+        <p class="is-size-7 has-text-grey">
+            Mostrando {{ page_obj.start_index }} a {{ page_obj.end_index }} de {{ page_obj.paginator.count }} transacciones
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 
