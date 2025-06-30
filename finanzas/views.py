@@ -204,11 +204,15 @@ def generar_deudas_masivas(request):
     if request.method == 'POST':
         form = GenerarDeudasForm(request.POST)
         if form.is_valid():
-            socios = form.cleaned_data['socios']
+            socios_ids = form.cleaned_data['socios']
             fecha_vencimiento = form.cleaned_data['fecha_vencimiento']
             cuota_societaria = form.cleaned_data['cuota_societaria']
             incluir_disciplinas = form.cleaned_data['incluir_disciplinas']
             observaciones = form.cleaned_data['observaciones']
+            
+            # Convertir la cadena de IDs en una lista de socios
+            ids_list = [int(id.strip()) for id in socios_ids.split(',') if id.strip()]
+            socios = Socio.objects.filter(id__in=ids_list)
             
             deudas_creadas = 0
             
@@ -269,7 +273,13 @@ def generar_deudas_masivas(request):
     else:
         form = GenerarDeudasForm()
     
-    return render(request, 'finanzas/generar_deudas.html', {'form': form})
+    # Pasar el queryset de socios al template para el JavaScript
+    socios_queryset = form.get_socios_queryset()
+    
+    return render(request, 'finanzas/generar_deudas.html', {
+        'form': form,
+        'socios_queryset': socios_queryset
+    })
 
 # Vistas de Transacciones
 @login_required

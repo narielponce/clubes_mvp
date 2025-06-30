@@ -115,10 +115,10 @@ class ComprobanteForm(forms.ModelForm):
 
 # Formulario para generar deudas masivamente
 class GenerarDeudasForm(forms.Form):
-    socios = forms.ModelMultipleChoiceField(
-        queryset=Socio.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        label='Seleccionar Socios'
+    socios = forms.CharField(
+        widget=forms.HiddenInput(),
+        label='IDs de Socios',
+        help_text='IDs de socios separados por comas'
     )
     fecha_vencimiento = forms.DateField(
         widget=forms.DateInput(attrs={'class': 'input', 'type': 'date'}),
@@ -140,4 +140,24 @@ class GenerarDeudasForm(forms.Form):
         widget=forms.Textarea(attrs={'class': 'textarea', 'rows': 3}),
         required=False,
         label='Observaciones'
-    ) 
+    )
+    
+    def clean_socios(self):
+        socios_ids = self.cleaned_data['socios']
+        if not socios_ids:
+            raise forms.ValidationError('Debe seleccionar al menos un socio.')
+        
+        try:
+            # Convertir la cadena de IDs en una lista de enteros
+            ids_list = [int(id.strip()) for id in socios_ids.split(',') if id.strip()]
+            # Verificar que todos los socios existen
+            socios = Socio.objects.filter(id__in=ids_list)
+            if len(socios) != len(ids_list):
+                raise forms.ValidationError('Algunos socios seleccionados no existen.')
+            return socios_ids
+        except ValueError:
+            raise forms.ValidationError('Formato de IDs de socios inválido.')
+    
+    def get_socios_queryset(self):
+        """Retorna el queryset de socios para el template"""
+        return Socio.objects.all() 

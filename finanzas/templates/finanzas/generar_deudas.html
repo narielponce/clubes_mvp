@@ -111,69 +111,37 @@
                                         <span class="icon">
                                             <i class="fas fa-info-circle"></i>
                                         </span>
-                                        <span>Selecciona los socios para los cuales generar deudas. Puedes usar los filtros para facilitar la selección.</span>
+                                        <span>Haz clic en "Seleccionar Socios" para abrir el selector con búsqueda y filtros.</span>
                                     </p>
                                 </div>
                                 
-                                <!-- Filtros rápidos -->
-                                <div class="field has-addons mb-3">
-                                    <div class="control">
-                                        <button type="button" class="button is-small" onclick="seleccionarTodos()">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-check-double"></i>
-                                            </span>
-                                            <span>Seleccionar Todos</span>
-                                        </button>
-                                    </div>
-                                    <div class="control">
-                                        <button type="button" class="button is-small" onclick="deseleccionarTodos()">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-times"></i>
-                                            </span>
-                                            <span>Deseleccionar Todos</span>
-                                        </button>
-                                    </div>
-                                    <div class="control">
-                                        <button type="button" class="button is-small" onclick="seleccionarActivos()">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-user-check"></i>
-                                            </span>
-                                            <span>Solo Activos</span>
-                                        </button>
-                                    </div>
+                                <!-- Botón para abrir modal -->
+                                <div class="field">
+                                    <button type="button" class="button is-primary" onclick="abrirModalSocios()">
+                                        <span class="icon">
+                                            <i class="fas fa-users"></i>
+                                        </span>
+                                        <span>Seleccionar Socios</span>
+                                    </button>
                                 </div>
 
-                                <!-- Lista de socios -->
-                                <div class="box" style="max-height: 400px; overflow-y: auto;">
-                                    {% if form.socios.errors %}
-                                    <p class="help is-danger mb-3">{{ form.socios.errors.0 }}</p>
-                                    {% endif %}
-                                    
-                                    <div class="columns is-multiline">
-                                        {% for socio in form.socios %}
-                                        <div class="column is-6">
-                                            <label class="checkbox">
-                                                {{ socio.tag }}
-                                                <span class="ml-2">
-                                                    <strong>{{ socio.choice_label }}</strong>
-                                                    <br>
-                                                    <small class="has-text-grey">
-                                                        {% if socio.data.instance.perfil_usuario %}
-                                                            {{ socio.data.instance.tipo_socio.nombre }} - 
-                                                            {{ socio.data.instance.fecha_afiliacion|date:"d/m/Y" }}
-                                                        {% else %}
-                                                            Socio sin perfil
-                                                        {% endif %}
-                                                    </small>
-                                                </span>
-                                            </label>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
+                                <!-- Socios seleccionados -->
+                                <div id="socios-seleccionados-container" class="mt-3" style="display: none;">
+                                    <label class="label">Socios Seleccionados:</label>
+                                    <div id="lista-socios-seleccionados" class="tags"></div>
+                                    <button type="button" class="button is-small is-danger mt-2" onclick="limpiarSeleccion()">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-trash"></i>
+                                        </span>
+                                        <span>Limpiar Selección</span>
+                                    </button>
                                 </div>
+
+                                <!-- Campo oculto para los IDs de socios -->
+                                <input type="hidden" name="socios" id="socios-ids" value="">
                                 
                                 <p class="help mt-2">
-                                    <span id="socios-seleccionados">0</span> socios seleccionados de {{ form.socios.queryset.count }} total
+                                    <span id="socios-seleccionados">0</span> socios seleccionados
                                 </p>
                             </div>
                         </div>
@@ -240,12 +208,101 @@
     </div>
 </div>
 
+<!-- Modal para selección de socios -->
+<div id="modal-socios" class="modal">
+    <div class="modal-background" onclick="cerrarModalSocios()"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">
+                <span class="icon">
+                    <i class="fas fa-users"></i>
+                </span>
+                Seleccionar Socios
+            </p>
+            <button class="delete" aria-label="close" onclick="cerrarModalSocios()"></button>
+        </header>
+        <section class="modal-card-body">
+            <!-- Filtros y búsqueda -->
+            <div class="field">
+                <label class="label">Buscar Socio</label>
+                <div class="control has-icons-left">
+                    <input class="input" type="text" id="buscar-socio" placeholder="Buscar por nombre, apellido, tipo o ID...">
+                    <span class="icon is-small is-left">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </div>
+                <p class="help" id="resultados-busqueda">
+                    Mostrando todos los socios
+                </p>
+            </div>
+
+            <!-- Filtros rápidos -->
+            <div class="field">
+                <label class="label">Filtros Rápidos</label>
+                <div class="buttons">
+                    <button type="button" class="button is-small" onclick="seleccionarTodos()">
+                        <span class="icon is-small">
+                            <i class="fas fa-check-double"></i>
+                        </span>
+                        <span>Seleccionar Todos</span>
+                    </button>
+                    <button type="button" class="button is-small" onclick="deseleccionarTodos()">
+                        <span class="icon is-small">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <span>Deseleccionar Todos</span>
+                    </button>
+                    <button type="button" class="button is-small" onclick="seleccionarActivos()">
+                        <span class="icon is-small">
+                            <i class="fas fa-user-check"></i>
+                        </span>
+                        <span>Solo Activos</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de socios -->
+            <div class="field">
+                <label class="label">Socios Disponibles</label>
+                <div class="box" style="max-height: 400px; overflow-y: auto;">
+                    <div id="lista-socios-modal">
+                        <!-- Los socios se cargarán dinámicamente aquí -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" onclick="confirmarSeleccion()">
+                <span class="icon">
+                    <i class="fas fa-check"></i>
+                </span>
+                <span>Confirmar Selección</span>
+            </button>
+            <button class="button" onclick="cerrarModalSocios()">Cancelar</button>
+        </footer>
+    </div>
+</div>
+
 <script>
+// Datos de socios (esto debería venir del backend)
+const socios = [
+    {% for socio in socios_queryset %}
+    {
+        id: {{ socio.id }},
+        nombre: "{{ socio }}",
+        tipo: "{{ socio.tipo_socio.nombre }}",
+        fecha_afiliacion: "{{ socio.fecha_afiliacion|date:'d/m/Y' }}",
+        activo: {% if socio.perfil_usuario %}{{ socio.perfil_usuario.esta_activo_sistema|yesno:"true,false" }}{% else %}false{% endif %}
+    },
+    {% endfor %}
+];
+
+let sociosSeleccionados = new Set();
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('generar-deudas-form');
     const cuotaInput = document.querySelector('input[name="cuota_societaria"]');
     const incluirDisciplinasCheckbox = document.querySelector('input[name="incluir_disciplinas"]');
-    const sociosCheckboxes = document.querySelectorAll('input[name="socios"]');
     const btnGenerar = document.getElementById('btn-generar');
     
     // Formatear cuota al escribir
@@ -259,59 +316,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Actualizar resumen cuando cambien las opciones
     incluirDisciplinasCheckbox.addEventListener('change', actualizarResumen);
-    sociosCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', actualizarResumen);
+    
+    // Búsqueda en tiempo real
+    document.getElementById('buscar-socio').addEventListener('input', function(e) {
+        filtrarSocios(e.target.value);
     });
-    
-    // Funciones de selección
-    window.seleccionarTodos = function() {
-        sociosCheckboxes.forEach(checkbox => {
-            checkbox.checked = true;
-        });
-        actualizarResumen();
-    };
-    
-    window.deseleccionarTodos = function() {
-        sociosCheckboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        actualizarResumen();
-    };
-    
-    window.seleccionarActivos = function() {
-        sociosCheckboxes.forEach(checkbox => {
-            // Aquí podrías agregar lógica para identificar socios activos
-            checkbox.checked = true;
-        });
-        actualizarResumen();
-    };
-    
-    function actualizarResumen() {
-        const sociosSeleccionados = document.querySelectorAll('input[name="socios"]:checked').length;
-        const cuotaSocietaria = parseFloat(cuotaInput.value) || 0;
-        const incluirDisciplinas = incluirDisciplinasCheckbox.checked;
-        
-        // Actualizar contadores
-        document.getElementById('socios-seleccionados').textContent = sociosSeleccionados;
-        document.getElementById('resumen-socios').textContent = sociosSeleccionados;
-        document.getElementById('resumen-cuota').textContent = cuotaSocietaria.toFixed(2).replace('.', ',');
-        document.getElementById('resumen-disciplinas').textContent = incluirDisciplinas ? 'Sí' : 'No';
-        
-        // Calcular total estimado (cuota societaria + estimado de disciplinas)
-        const estimadoDisciplinas = incluirDisciplinas ? 5000 : 0; // Estimado promedio
-        const totalPorSocio = cuotaSocietaria + estimadoDisciplinas;
-        document.getElementById('resumen-total').textContent = totalPorSocio.toFixed(2).replace('.', ',');
-        
-        // Habilitar/deshabilitar botón
-        btnGenerar.disabled = sociosSeleccionados === 0;
-    }
     
     // Validación del formulario
     form.addEventListener('submit', function(e) {
-        const sociosSeleccionados = document.querySelectorAll('input[name="socios"]:checked').length;
+        const cantidadSociosSeleccionados = sociosSeleccionados.size;
         const fechaVencimiento = document.querySelector('input[name="fecha_vencimiento"]').value;
         
-        if (sociosSeleccionados === 0) {
+        if (cantidadSociosSeleccionados === 0) {
             e.preventDefault();
             alert('Debe seleccionar al menos un socio.');
             return;
@@ -324,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Confirmación final
-        if (!confirm(`¿Está seguro de que desea generar ${sociosSeleccionados} deudas? Esta acción no se puede deshacer.`)) {
+        if (!confirm(`¿Está seguro de que desea generar ${cantidadSociosSeleccionados} deudas? Esta acción no se puede deshacer.`)) {
             e.preventDefault();
         }
     });
@@ -332,5 +348,213 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar resumen
     actualizarResumen();
 });
+
+function cargarSociosEnModal() {
+    const container = document.getElementById('lista-socios-modal');
+    container.innerHTML = '';
+    
+    if (socios.length === 0) {
+        container.innerHTML = '<p class="has-text-grey">No hay socios disponibles.</p>';
+        document.getElementById('resultados-busqueda').textContent = 'No hay socios disponibles';
+        return;
+    }
+    
+    socios.forEach(socio => {
+        const div = document.createElement('div');
+        div.className = 'columns is-multiline is-mobile mb-2';
+        div.innerHTML = `
+            <div class="column is-1">
+                <label class="checkbox">
+                    <input type="checkbox" value="${socio.id}" onchange="toggleSocio(${socio.id})">
+                </label>
+            </div>
+            <div class="column is-11">
+                <div class="box is-small">
+                    <div class="columns is-mobile">
+                        <div class="column is-12">
+                            <strong>Socio: ${socio.id} - ${socio.nombre}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+    
+    // Inicializar contador de resultados
+    document.getElementById('resultados-busqueda').textContent = `Mostrando todos los socios (${socios.length})`;
+    
+    console.log('Socios cargados:', socios.length); // Debug
+}
+
+function filtrarSocios(busqueda) {
+    const container = document.getElementById('lista-socios-modal');
+    const elementos = container.querySelectorAll('.columns');
+    const busquedaLower = busqueda.toLowerCase();
+    const resultadosElement = document.getElementById('resultados-busqueda');
+    
+    let resultadosEncontrados = 0;
+    
+    // Filtrar elementos que corresponden a socios (excluir mensajes de "no hay socios")
+    const elementosSocios = Array.from(elementos).filter(el => el.querySelector('input[type="checkbox"]'));
+    
+    elementosSocios.forEach((elemento, index) => {
+        if (index < socios.length) {
+            const socio = socios[index];
+            const nombre = socio.nombre.toLowerCase();
+            const tipo = socio.tipo.toLowerCase();
+            const id = socio.id.toString();
+            
+            // Buscar en ID, nombre y tipo
+            if (nombre.includes(busquedaLower) || 
+                tipo.includes(busquedaLower) || 
+                id.includes(busquedaLower)) {
+                elemento.style.display = 'flex';
+                resultadosEncontrados++;
+            } else {
+                elemento.style.display = 'none';
+            }
+        }
+    });
+    
+    // Actualizar indicador de resultados
+    if (busqueda === '') {
+        resultadosElement.textContent = `Mostrando todos los socios (${socios.length})`;
+    } else {
+        resultadosElement.textContent = `Encontrados ${resultadosEncontrados} de ${socios.length} socios`;
+    }
+    
+    console.log('Búsqueda:', busqueda, 'Resultados encontrados:', resultadosEncontrados, 'Total socios:', socios.length);
+}
+
+function toggleSocio(id) {
+    if (sociosSeleccionados.has(id)) {
+        sociosSeleccionados.delete(id);
+    } else {
+        sociosSeleccionados.add(id);
+    }
+}
+
+function abrirModalSocios() {
+    document.getElementById('modal-socios').classList.add('is-active');
+    // Cargar socios después de que el modal esté visible
+    setTimeout(() => {
+        cargarSociosEnModal();
+    }, 100);
+}
+
+function cerrarModalSocios() {
+    document.getElementById('modal-socios').classList.remove('is-active');
+}
+
+function confirmarSeleccion() {
+    actualizarSociosSeleccionados();
+    cerrarModalSocios();
+}
+
+function actualizarSociosSeleccionados() {
+    const container = document.getElementById('socios-seleccionados-container');
+    const lista = document.getElementById('lista-socios-seleccionados');
+    const idsInput = document.getElementById('socios-ids');
+    
+    lista.innerHTML = '';
+    
+    if (sociosSeleccionados.size > 0) {
+        container.style.display = 'block';
+        
+        sociosSeleccionados.forEach(id => {
+            const socio = socios.find(s => s.id === id);
+            if (socio) {
+                const tag = document.createElement('span');
+                tag.className = 'tag is-primary';
+                tag.innerHTML = `
+                    ${socio.nombre}
+                    <button class="delete is-small" onclick="removerSocio(${id})"></button>
+                `;
+                lista.appendChild(tag);
+            }
+        });
+        
+        idsInput.value = Array.from(sociosSeleccionados).join(',');
+    } else {
+        container.style.display = 'none';
+        idsInput.value = '';
+    }
+    
+    actualizarResumen();
+}
+
+function removerSocio(id) {
+    sociosSeleccionados.delete(id);
+    actualizarSociosSeleccionados();
+    
+    // Desmarcar checkbox en el modal
+    const checkbox = document.querySelector(`input[value="${id}"]`);
+    if (checkbox) {
+        checkbox.checked = false;
+    }
+}
+
+function limpiarSeleccion() {
+    sociosSeleccionados.clear();
+    actualizarSociosSeleccionados();
+    
+    // Desmarcar todos los checkboxes en el modal
+    document.querySelectorAll('#lista-socios-modal input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+// Funciones de selección masiva
+window.seleccionarTodos = function() {
+    socios.forEach(socio => {
+        sociosSeleccionados.add(socio.id);
+    });
+    document.querySelectorAll('#lista-socios-modal input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+};
+
+window.deseleccionarTodos = function() {
+    sociosSeleccionados.clear();
+    document.querySelectorAll('#lista-socios-modal input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+};
+
+window.seleccionarActivos = function() {
+    sociosSeleccionados.clear();
+    socios.forEach(socio => {
+        if (socio.activo) {
+            sociosSeleccionados.add(socio.id);
+        }
+    });
+    
+    document.querySelectorAll('#lista-socios-modal input[type="checkbox"]').forEach((checkbox, index) => {
+        checkbox.checked = socios[index].activo;
+    });
+};
+
+function actualizarResumen() {
+    const cantidadSociosSeleccionados = sociosSeleccionados.size; // Usar el Set en lugar de checkboxes
+    const cuotaInput = document.querySelector('input[name="cuota_societaria"]');
+    const cuotaSocietaria = parseFloat(cuotaInput.value) || 0;
+    const incluirDisciplinas = document.querySelector('input[name="incluir_disciplinas"]').checked;
+    
+    // Actualizar contadores
+    document.getElementById('socios-seleccionados').textContent = cantidadSociosSeleccionados;
+    document.getElementById('resumen-socios').textContent = cantidadSociosSeleccionados;
+    document.getElementById('resumen-cuota').textContent = cuotaSocietaria.toFixed(2).replace('.', ',');
+    document.getElementById('resumen-disciplinas').textContent = incluirDisciplinas ? 'Sí' : 'No';
+    
+    // Calcular total estimado (cuota societaria + estimado de disciplinas)
+    const estimadoDisciplinas = incluirDisciplinas ? 5000 : 0; // Estimado promedio
+    const totalPorSocio = cuotaSocietaria + estimadoDisciplinas;
+    document.getElementById('resumen-total').textContent = totalPorSocio.toFixed(2).replace('.', ',');
+    
+    // Habilitar/deshabilitar botón
+    const btnGenerar = document.getElementById('btn-generar');
+    btnGenerar.disabled = cantidadSociosSeleccionados === 0;
+}
 </script>
 {% endblock %} 
