@@ -45,6 +45,12 @@ def is_tesorero(user):
     # Verificar si pertenece al grupo Tesoreria
     return user.groups.filter(name='Tesoreria').exists()
 
+def is_coordinador(user):
+    if not user.is_authenticated:
+        return False
+    return user.groups.filter(name='Coordinador').exists()
+
 # Convertir las funciones en decoradores de Django
 is_admin = user_passes_test(is_admin)
 tesorero_required = user_passes_test(is_tesorero)
+coordinador_required = user_passes_test(is_coordinador)

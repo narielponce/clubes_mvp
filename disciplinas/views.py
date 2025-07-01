@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.models import Group
 from .models import Disciplina, Categoria, Horario, Dia, Inscripcion
 from .forms import DisciplinaForm, CategoriaForm, HorarioForm, DiaForm, InscripcionForm
-from usuarios.decorators import is_admin
+from usuarios.decorators import is_admin, coordinador_required
 from django.db import models
 
 def is_admin_or_coordinador(user):
@@ -184,4 +184,14 @@ def cancelar_inscripcion_admin(request, inscripcion_pk):
     
     return render(request, 'disciplinas/confirmar_cancelar_inscripcion.html', {
         'inscripcion': inscripcion
+    })
+
+@login_required
+@coordinador_required
+def lista_disciplinas_coordinador(request):
+    user = request.user
+    # Suponiendo que el modelo Disciplina tiene un campo 'coordinador' que apunta a PerfilUsuario
+    disciplinas = Disciplina.objects.filter(coordinador__usuario=user)
+    return render(request, 'disciplinas/lista_disciplinas_coordinador.html', {
+        'disciplinas': disciplinas
     })

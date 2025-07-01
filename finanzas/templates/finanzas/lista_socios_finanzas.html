@@ -1,0 +1,98 @@
+{% extends 'usuarios/base_tesorero.html' %}
+{% load static %}
+
+{% block title %}Listado de Socios - Finanzas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="section">
+        <h1 class="title">Listado de Socios</h1>
+        <form method="get" class="mb-5">
+            <div class="columns is-multiline">
+                <div class="column is-4">
+                    <div class="field">
+                        <label class="label">Buscar</label>
+                        <div class="control">
+                            <input class="input" type="text" name="q" placeholder="Nombre, apellido, tipo o ID" value="{{ query }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label">Tipo de Socio</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="tipo">
+                                    <option value="">Todos</option>
+                                    {% for t in tipos %}
+                                        <option value="{{ t.nombre }}" {% if tipo_selected == t.nombre %}selected{% endif %}>{{ t.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-3">
+                    <div class="field">
+                        <label class="label">Estado</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="estado">
+                                    <option value="">Todos</option>
+                                    <option value="activo" {% if estado_selected == 'activo' %}selected{% endif %}>Activo</option>
+                                    <option value="inactivo" {% if estado_selected == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-2 is-flex is-align-items-end">
+                    <button class="button is-primary is-fullwidth" type="submit">
+                        <span class="icon"><i class="fas fa-search"></i></span>
+                        <span>Buscar</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div class="box">
+            <table class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for socio in socios %}
+                    <tr>
+                        <td>{{ socio.id }}</td>
+                        <td>{% if socio.perfil_usuario %}{{ socio.perfil_usuario.usuario.get_full_name }}{% else %}<span class="has-text-grey">Sin perfil</span>{% endif %}</td>
+                        <td>{{ socio.tipo_socio.nombre }}</td>
+                        <td>
+                            {% if socio.perfil_usuario and socio.perfil_usuario.esta_activo_sistema %}
+                                <span class="tag is-success">Activo</span>
+                            {% else %}
+                                <span class="tag is-danger">Inactivo</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="#" class="button is-small is-info is-light" title="Ver estado de cuenta">
+                                <span class="icon"><i class="fas fa-eye"></i></span>
+                                <span>Ver estado de cuenta</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="has-text-centered">No se encontraron socios.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

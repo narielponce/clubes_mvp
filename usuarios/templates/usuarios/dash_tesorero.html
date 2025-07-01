@@ -61,6 +61,12 @@
                 <p class="is-size-7 has-text-grey-light">Cuentas disponibles</p>
             </div>
         </div>
+        <div class="column is-3">
+            <a href="{% url 'finanzas:lista_socios_finanzas' %}" class="button is-info is-fullwidth is-large mb-4">
+                <span class="icon is-large"><i class="fas fa-users"></i></span>
+                <span>Estados de cuenta</span>
+            </a>
+        </div>
     </div>
 
     {% if socio %}

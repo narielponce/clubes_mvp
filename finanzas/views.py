@@ -11,9 +11,10 @@ from .forms import (
     CuentaForm, DeudaForm, ItemDeudaForm, TransaccionForm, 
     ComprobanteForm, GenerarDeudasForm
 )
-from socios.models import Socio
+from socios.models import Socio, TipoSocio
 from disciplinas.models import Disciplina, Categoria
 from usuarios.decorators import tesorero_required
+from django.db.models import Q
 
 # Vistas de Cuentas
 @login_required
@@ -461,3 +462,36 @@ def get_categorias_disciplina(request):
         data = [{'id': cat.id, 'nombre': cat.nombre} for cat in categorias]
         return JsonResponse(data, safe=False)
     return JsonResponse([], safe=False)
+
+@login_required
+@tesorero_required
+def lista_socios_finanzas(request):
+    query = request.GET.get('q', '').strip()
+    tipo = request.GET.get('tipo', '')
+    estado = request.GET.get('estado', '')
+
+    socios = Socio.objects.select_related('perfil_usuario', 'tipo_socio').all()
+
+    if query:
+        socios = socios.filter(
+            Q(perfil_usuario__usuario__first_name__icontains=query) |
+            Q(perfil_usuario__usuario__last_name__icontains=query) |
+            Q(tipo_socio__nombre__icontains=query) |
+            Q(id__icontains=query)
+        )
+    if tipo:
+        socios = socios.filter(tipo_socio__nombre=tipo)
+    if estado:
+        if estado == 'activo':
+            socios = socios.filter(perfil_usuario__esta_activo_sistema=True)
+        elif estado == 'inactivo':
+            socios = socios.filter(perfil_usuario__esta_activo_sistema=False)
+
+    tipos = TipoSocio.objects.all()
+    return render(request, 'finanzas/lista_socios_finanzas.html', {
+        'socios': socios,
+        'tipos': tipos,
+        'query': query,
+        'tipo_selected': tipo,
+        'estado_selected': estado,
+    })

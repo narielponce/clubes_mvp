@@ -10,7 +10,28 @@
     <p class="is-size-7 has-text-grey-light">Sistema de Gestión</p>
 </div>
 <ul class="menu-list p-2">
-    <li><a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>Inicio</a></li>
-    <li><a href="{% url 'finanzas:dashboard' %}" {% if '/finanzas' in request.path %}class="is-active"{% endif %}>Finanzas</a></li>
-    <li><a href="#">Documentación</a></li>
+    <li>
+        <a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span>Inicio</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'finanzas:dashboard' %}" {% if request.path == '/finanzas/dashboard/' or request.path == '/finanzas/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-coins"></i></span>
+            <span>Finanzas</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'finanzas:lista_socios_finanzas' %}" {% if '/finanzas/socios/' in request.path %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-users"></i></span>
+            <span>Estados de cuenta</span>
+        </a>
+    </li>
+    <li>
+        <a href="#">
+            <span class="icon"><i class="fas fa-book"></i></span>
+            <span>Documentación</span>
+        </a>
+    </li>
 </ul>

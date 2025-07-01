@@ -1,0 +1,63 @@
+{% extends 'usuarios/base_coordinador.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+    <h1 class="title">Mis Disciplinas</h1>
+
+    <table class="table is-fullwidth">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Lugar</th>
+                <th>Costo Mensual</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <script>
+            function confirmDelete(pk) {
+                if (confirm('¿Está seguro que desea eliminar esta disciplina?')) {
+                    window.location.href = `{% url 'disciplinas:eliminar_disciplina' '0' %}`.replace('0', pk);
+                }
+            }
+        </script>
+        <tbody>
+            {% for disciplina in disciplinas %}
+            <tr>
+                <td>{{ disciplina.nombre }}</td>
+                <td>{{ disciplina.lugar }}</td>
+                <td>${{ disciplina.costo_mensual| intcomma }}</td>
+                <td>
+                    {% if disciplina.activa %}
+                    <span class="tag is-success">Activa</span>
+                    {% else %}
+                    <span class="tag is-danger">Inactiva</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="buttons are-small">
+                        <a href="{% url 'disciplinas:detalle_disciplina' disciplina.pk %}"
+                            class="button is-small is-info" title="Ver Detalle">
+                            <span class="icon is-small">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </a>
+                        <a href="#"
+                            class="button is-small is-primary" title="Inscribir Socios">
+                            <span class="icon is-small">
+                                <i class="fas fa-user-plus"></i>
+                            </span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="has-text-centered">No tienes disciplinas asignadas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %} 

@@ -11,6 +11,6 @@
 </div>
 <ul class="menu-list p-2">
     <li><a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>Inicio</a></li>
-    <li><a href="{% url 'usuarios:dash_coordinador' %}" {% if request.path == '/usuarios/dash-coordinador/' or 'inscripciones' in request.path %}class="is-active"{% endif %}>Gestión deportistas</a></li>
+    <li><a href="{% url 'disciplinas:lista_disciplinas_coordinador' %}" {% if request.path == '/disciplinas/mis-disciplinas/' %}class="is-active"{% endif %}>Mis Disciplinas</a></li>
     <li><a href="#">Documentación</a></li>
 </ul>

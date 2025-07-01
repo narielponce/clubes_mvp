@@ -10,10 +10,40 @@
     <p class="is-size-7 has-text-grey-light">Sistema de Gestión</p>
 </div>
 <ul class="menu-list p-2">
-    <li><a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>Inicio</a></li>
-    <li><a href="{% url 'usuarios:lista_usuarios' %}" {% if request.path == '/usuarios/usuarios/' %}class="is-active"{% endif %}>Usuarios</a></li>
-    <li><a href="{% url 'usuarios:lista_grupos' %}" {% if request.path == '/usuarios/grupos/' %}class="is-active"{% endif %}>Grupos</a></li>
-    <li><a href="{% url 'socios:lista_socios' %}" {% if request.path == '/socios/' %}class="is-active"{% endif %}>Socios</a></li>
-    <li><a href="{% url 'disciplinas:lista' %}" {% if request.path == '/disciplinas/disciplinas/' %}class="is-active"{% endif %}>Disciplinas</a></li>
-    <li><a href="#">Documentación</a></li>
+    <li>
+        <a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span>Inicio</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'usuarios:lista_usuarios' %}" {% if request.path == '/usuarios/usuarios/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-user"></i></span>
+            <span>Usuarios</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'usuarios:lista_grupos' %}" {% if request.path == '/usuarios/grupos/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-users-cog"></i></span>
+            <span>Grupos</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'socios:lista_socios' %}" {% if request.path == '/socios/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-id-card"></i></span>
+            <span>Socios</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'disciplinas:lista' %}" {% if request.path == '/disciplinas/disciplinas/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-dumbbell"></i></span>
+            <span>Disciplinas</span>
+        </a>
+    </li>
+    <li>
+        <a href="#">
+            <span class="icon"><i class="fas fa-book"></i></span>
+            <span>Documentación</span>
+        </a>
+    </li>
 </ul>
