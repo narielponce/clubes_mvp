@@ -10,7 +10,22 @@
     <p class="is-size-7 has-text-grey-light">Sistema de Gestión</p>
 </div>
 <ul class="menu-list p-2">
-    <li><a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>Inicio</a></li>
-    <li><a href="{% url 'disciplinas:lista_disciplinas_coordinador' %}" {% if request.path == '/disciplinas/mis-disciplinas/' %}class="is-active"{% endif %}>Mis Disciplinas</a></li>
-    <li><a href="#">Documentación</a></li>
+    <li>
+        <a href="{% url 'usuarios:dashboard' %}" {% if request.path == '/usuarios/dashboard/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-home"></i></span>
+            <span>Inicio</span>
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'disciplinas:lista_disciplinas_coordinador' %}" {% if request.path == '/disciplinas/mis-disciplinas/' %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-medal"></i></span>
+            <span>Disciplinas</span>
+        </a>
+    </li>
+    <li>
+        <a href="#">
+            <span class="icon"><i class="fas fa-book"></i></span>
+            <span>Documentación</span>
+        </a>
+    </li>
 </ul>

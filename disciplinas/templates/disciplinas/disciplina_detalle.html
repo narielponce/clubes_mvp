@@ -57,7 +57,6 @@
                         <th>Especialidad</th>
                         <th>Cupo Máximo</th>
                         <th>Horario</th>
-                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -75,13 +74,7 @@
                         <td>{{ categoria.especialidad }}</td>
                         <td>{{ categoria.cupo_maximo }}</td>
                         <td>{{ categoria.horario }}</td>
-                        <td>
-                            {% if categoria.activa %}
-                                <span class="tag is-success">Activa</span>
-                            {% else %}
-                                <span class="tag is-danger">Inactiva</span>
-                            {% endif %}
-                        </td>
+                        
                         <td>
                             <div class="buttons">
                                 <a href="{% url 'disciplinas:editar_categoria' categoria.pk %}" class="button is-small is-warning">

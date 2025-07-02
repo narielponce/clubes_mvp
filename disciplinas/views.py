@@ -6,6 +6,7 @@ from .models import Disciplina, Categoria, Horario, Dia, Inscripcion
 from .forms import DisciplinaForm, CategoriaForm, HorarioForm, DiaForm, InscripcionForm
 from usuarios.decorators import is_admin, coordinador_required
 from django.db import models
+from socios.models import Socio
 
 def is_admin_or_coordinador(user):
     """Verifica si el usuario es administrador o coordinador"""
@@ -190,8 +191,47 @@ def cancelar_inscripcion_admin(request, inscripcion_pk):
 @coordinador_required
 def lista_disciplinas_coordinador(request):
     user = request.user
-    # Suponiendo que el modelo Disciplina tiene un campo 'coordinador' que apunta a PerfilUsuario
     disciplinas = Disciplina.objects.filter(coordinador__usuario=user)
+    # Convertir a lista para poder modificar los objetos
+    disciplinas = list(disciplinas)
+    for disciplina in disciplinas:
+        categorias = list(disciplina.categorias.all())
+        for cat in categorias:
+            cat.cantidad_inscriptos = cat.inscritos.filter(activa=True).count()
+        disciplina.categorias_list = categorias
     return render(request, 'disciplinas/lista_disciplinas_coordinador.html', {
         'disciplinas': disciplinas
+    })
+
+@login_required
+@coordinador_required
+def inscribir_socios(request, disciplina_pk):
+    user = request.user
+    disciplina = Disciplina.objects.get(pk=disciplina_pk, coordinador__usuario=user)
+    categorias = disciplina.categorias.all()
+    socios = Socio.objects.all()
+
+    # Inscripciones activas agrupadas por categoría
+    inscripciones_por_categoria = {}
+    for cat in categorias:
+        inscripciones_por_categoria[cat] = cat.inscritos.filter(activa=True).select_related('socio__perfil_usuario__usuario')
+
+    if request.method == 'POST':
+        categoria_id = request.POST.get('categoria')
+        socios_ids = request.POST.getlist('socios')
+        if not categoria_id:
+            messages.error(request, 'Debe seleccionar una categoría.')
+        else:
+            categoria = categorias.get(pk=categoria_id)
+            for socio_id in socios_ids:
+                socio = Socio.objects.get(pk=socio_id)
+                Inscripcion.objects.get_or_create(socio=socio, categoria=categoria, activa=True)
+            messages.success(request, 'Socios inscritos correctamente.')
+            return redirect('disciplinas:lista_disciplinas_coordinador')
+
+    return render(request, 'disciplinas/inscribir_socios.html', {
+        'disciplina': disciplina,
+        'categorias': categorias,
+        'socios': socios,
+        'inscripciones_por_categoria': inscripciones_por_categoria
     })

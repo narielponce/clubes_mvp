@@ -1,0 +1,80 @@
+{% extends 'usuarios/base_coordinador.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="title">Inscribir Socios a {{ disciplina.nombre }}</h1>
+    {% if messages %}
+    <div class="notification is-{{ message.tags }}">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="field">
+            <label class="label">Categoría</label>
+            <div class="control">
+                <div class="select is-fullwidth">
+                    <select name="categoria" required>
+                        <option value="">Seleccione una categoría</option>
+                        {% for cat in categorias %}
+                        <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Socios disponibles</label>
+            <div class="control">
+                <div class="select is-multiple is-fullwidth">
+                    <select name="socios" multiple size="10" required>
+                        {% for socio in socios_no_inscritos %}
+                        <option value="{{ socio.id }}">{{ socio.perfil_usuario.usuario.get_full_name }} (ID: {{ socio.id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <p class="help">Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar varios socios.</p>
+        </div>
+        <div class="field is-grouped">
+            <div class="control">
+                <button type="submit" class="button is-primary">
+                    <span class="icon"><i class="fas fa-user-plus"></i></span>
+                    <span>Inscribir</span>
+                </button>
+            </div>
+            <div class="control">
+                <a href="{% url 'disciplinas:lista_disciplinas_coordinador' %}" class="button is-light">Cancelar</a>
+            </div>
+        </div>
+    </form>
+
+    {% if inscripciones_por_categoria %}
+    <hr>
+    <h2 class="subtitle">Socios ya inscriptos por categoría</h2>
+    {% for categoria, inscripciones in inscripciones_por_categoria.items %}
+        <h3 class="is-size-5">{{ categoria.nombre }}</h3>
+        <table class="table is-fullwidth is-striped">
+            <thead>
+                <tr>
+                    <th>Socio</th>
+                    <th>Fecha de inscripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for insc in inscripciones %}
+                <tr>
+                    <td>{{ insc.socio.perfil_usuario.usuario.get_full_name }}</td>
+                    <td>{{ insc.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" class="has-text-grey">No hay inscriptos en esta categoría.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %} 
