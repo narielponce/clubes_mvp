@@ -8,7 +8,6 @@
         <thead>
             <tr>
                 <th>Nombre</th>
-                <th>Lugar</th>
                 <th>Costo Mensual</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -25,7 +24,6 @@
             {% for disciplina in disciplinas %}
             <tr>
                 <td>{{ disciplina.nombre }}</td>
-                <td>{{ disciplina.lugar }}</td>
                 <td>${{ disciplina.costo_mensual| intcomma }}</td>
                 <td>
                     {% if disciplina.activa %}
@@ -51,25 +49,19 @@
                     </div>
                 </td>
             </tr>
+            <tr>
+                <th colspan="3" style="padding-left: 2em;">Categorías</th><th>Detalles</th>
+            </tr>
             {% for categoria in disciplina.categorias_list %}
             <tr class="is-size-7 has-background-light">
-                <td colspan="2" style="padding-left: 2em;">
+                <td colspan="3" style="padding-left: 4em;">
                     <span class="icon"><i class="fas fa-angle-right"></i></span>
                     <strong>{{ categoria.nombre }}</strong>
                 </td>
-                <td colspan="1">
-                    <span class="icon" title="Socios inscriptos activos">
-                        <i class="fas fa-users"></i>
-                    </span>
-                    <span class="tag is-info is-light" title="Solo inscripciones activas">
-                        {{ categoria.cantidad_inscriptos }} Socios inscriptos
-                    </span>
-                </td>
-                <td colspan="1"></td>
                 <td>
-                    <a href="#" class="button is-small is-link" title="Ver inscriptos">
+                    <a href="{% url 'disciplinas:socios_inscriptos_categoria' categoria.pk %}" class="button is-small is-link" title="Ver inscriptos">
                         <span class="icon is-small"><i class="fas fa-list"></i></span>
-                        <span>Ver inscriptos</span>
+                        <span>{{ categoria.cantidad_inscriptos }} Socios inscriptos</span>
                     </a>
                 </td>
             </tr>

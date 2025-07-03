@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">
+                    <span class="icon has-text-primary">
+                        <i class="fas fa-user-edit"></i>
+                    </span>
+                    Mi Perfil
+                </h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'usuarios:dashboard' %}" class="button is-light">
+                    <span class="icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span>Volver</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="box">
+        {% csrf_token %}
+        
+        <div class="columns is-multiline">
+            <!-- Datos básicos del usuario -->
+            <div class="column is-6">
+                <h3 class="title is-4">Datos Básicos</h3>
+                
+                <div class="field">
+                    <label class="label">Nombre de usuario</label>
+                    <div class="control">
+                        {{ user_form.username }}
+                    </div>
+                    {% if user_form.username.errors %}
+                        <p class="help is-danger">{{ user_form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Contraseña (dejar en blanco para mantener la actual)</label>
+                    <div class="control">
+                        {{ user_form.password }}
+                    </div>
+                    {% if user_form.password.errors %}
+                        <p class="help is-danger">{{ user_form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Confirmar contraseña</label>
+                    <div class="control">
+                        {{ user_form.confirm_password }}
+                    </div>
+                    {% if user_form.confirm_password.errors %}
+                        <p class="help is-danger">{{ user_form.confirm_password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Nombre *</label>
+                    <div class="control">
+                        {{ user_form.first_name }}
+                    </div>
+                    {% if user_form.first_name.errors %}
+                        <p class="help is-danger">{{ user_form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Apellido *</label>
+                    <div class="control">
+                        {{ user_form.last_name }}
+                    </div>
+                    {% if user_form.last_name.errors %}
+                        <p class="help is-danger">{{ user_form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Email *</label>
+                    <div class="control">
+                        {{ user_form.email }}
+                    </div>
+                    {% if user_form.email.errors %}
+                        <p class="help is-danger">{{ user_form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Datos del perfil -->
+            <div class="column is-6">
+                <h3 class="title is-4">Datos del Perfil</h3>
+                
+                <div class="field">
+                    <label class="label">Tipo de documento *</label>
+                    <div class="control">
+                        {{ perfil_form.tipo_documento }}
+                    </div>
+                    {% if perfil_form.tipo_documento.errors %}
+                        <p class="help is-danger">{{ perfil_form.tipo_documento.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Número de documento *</label>
+                    <div class="control">
+                        {{ perfil_form.numero_documento }}
+                    </div>
+                    {% if perfil_form.numero_documento.errors %}
+                        <p class="help is-danger">{{ perfil_form.numero_documento.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Teléfono</label>
+                    <div class="control">
+                        {{ perfil_form.telefono }}
+                    </div>
+                    {% if perfil_form.telefono.errors %}
+                        <p class="help is-danger">{{ perfil_form.telefono.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Dirección</label>
+                    <div class="control">
+                        {{ perfil_form.direccion }}
+                    </div>
+                    {% if perfil_form.direccion.errors %}
+                        <p class="help is-danger">{{ perfil_form.direccion.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="field">
+                    <label class="label">Fecha de nacimiento</label>
+                    <div class="control">
+                        {{ perfil_form.fecha_nacimiento }}
+                    </div>
+                    {% if perfil_form.fecha_nacimiento.errors %}
+                        <p class="help is-danger">{{ perfil_form.fecha_nacimiento.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Errores generales del formulario -->
+        {% if user_form.non_field_errors %}
+            <div class="notification is-danger">
+                {{ user_form.non_field_errors }}
+            </div>
+        {% endif %}
+        {% if perfil_form.non_field_errors %}
+            <div class="notification is-danger">
+                {{ perfil_form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- Botones de acción -->
+        <div class="field is-grouped is-grouped-right">
+            <div class="control">
+                <a href="{% url 'usuarios:dashboard' %}" class="button is-light">Cancelar</a>
+            </div>
+            <div class="control">
+                <button type="submit" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-save"></i>
+                    </span>
+                    <span>Guardar Cambios</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %} 

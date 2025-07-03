@@ -30,7 +30,7 @@
             <div class="control">
                 <div class="select is-multiple is-fullwidth">
                     <select name="socios" multiple size="10" required>
-                        {% for socio in socios_no_inscritos %}
+                        {% for socio in socios %}
                         <option value="{{ socio.id }}">{{ socio.perfil_usuario.usuario.get_full_name }} (ID: {{ socio.id }})</option>
                         {% endfor %}
                     </select>

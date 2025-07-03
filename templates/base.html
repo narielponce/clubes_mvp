@@ -39,7 +39,7 @@
                                     Bienvenido, {{ request.user.get_full_name }} ({{ request.user.groups.first.name }})
                                 </a>
                                 <div class="navbar-dropdown">
-                                    <a class="navbar-item" href="{% url 'usuarios:editar_usuario' request.user.id %}">
+                                    <a class="navbar-item" href="{% url 'usuarios:mi_perfil' %}">
                                         Mi perfil
                                     </a>
                                     <hr class="navbar-divider">

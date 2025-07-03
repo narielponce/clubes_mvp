@@ -235,3 +235,13 @@ def inscribir_socios(request, disciplina_pk):
         'socios': socios,
         'inscripciones_por_categoria': inscripciones_por_categoria
     })
+
+@login_required
+@coordinador_required
+def socios_inscriptos_categoria(request, categoria_pk):
+    categoria = get_object_or_404(Categoria, pk=categoria_pk)
+    inscripciones = Inscripcion.objects.filter(categoria=categoria, activa=True).select_related('socio__perfil_usuario__usuario')
+    return render(request, 'disciplinas/socios_inscriptos_categoria.html', {
+        'categoria': categoria,
+        'inscripciones': inscripciones,
+    })

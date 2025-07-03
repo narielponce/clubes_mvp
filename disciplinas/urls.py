@@ -27,4 +27,5 @@ urlpatterns = [
     path('cancelar-inscripcion/<int:inscripcion_pk>/', views.cancelar_inscripcion, name='cancelar_inscripcion'),
     path('mis-disciplinas/', views.lista_disciplinas_coordinador, name='lista_disciplinas_coordinador'),
     path('<int:disciplina_pk>/inscribir-socios/', views.inscribir_socios, name='inscribir_socios'),
+    path('categoria/<int:categoria_pk>/inscriptos/', views.socios_inscriptos_categoria, name='socios_inscriptos_categoria'),
 ]

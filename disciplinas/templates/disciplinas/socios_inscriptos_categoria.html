@@ -1,0 +1,25 @@
+{% extends 'usuarios/base_coordinador.html' %}
+{% block content %}
+<div class="container">
+    <h1 class="title">Socios inscriptos en {{ categoria.nombre }}</h1>
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Socio</th>
+                <th>Fecha de inscripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for insc in inscripciones %}
+            <tr>
+                <td>{{ insc.socio.perfil_usuario.usuario.get_full_name }}</td>
+                <td>{{ insc.fecha_inscripcion|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" class="has-text-grey">No hay inscriptos en esta categoría.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'disciplinas:lista_disciplinas_coordinador' %}" class="button is-light">Volver</a>
+</div>
+{% endblock %} 

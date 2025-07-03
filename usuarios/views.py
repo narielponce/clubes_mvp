@@ -7,7 +7,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import PerfilUsuario
-from .forms import UsuarioForm, PerfilUsuarioForm
+from .forms import UsuarioForm, PerfilUsuarioForm, MiUsuarioForm, MiPerfilUsuarioForm
 from django.db.models import Count
 from django.db.models import Q
 from .decorators import verificar_rol
@@ -415,3 +415,37 @@ def dash_coordinador(request):
     }
     
     return render(request, 'usuarios/dash_coordinador.html', context)
+
+@login_required
+def mi_perfil(request):
+    """Vista para que cualquier usuario autenticado pueda editar su propio perfil"""
+    user = request.user
+    
+    if request.method == 'POST':
+        user_form = MiUsuarioForm(request.POST, instance=user)
+        perfil_form = MiPerfilUsuarioForm(request.POST, instance=user.perfil)
+        
+        if user_form.is_valid() and perfil_form.is_valid():
+            user = user_form.save()
+            perfil_form.save()
+            
+            # Si se proporcionó una nueva contraseña, actualizarla
+            password = user_form.cleaned_data.get('password')
+            if password:
+                user.set_password(password)
+                user.save()
+                # Re-autenticar al usuario después de cambiar la contraseña
+                login(request, user)
+            
+            messages.success(request, 'Tu perfil ha sido actualizado exitosamente.')
+            return redirect('usuarios:dashboard')
+    else:
+        user_form = MiUsuarioForm(instance=user)
+        perfil_form = MiPerfilUsuarioForm(instance=user.perfil)
+    
+    context = {
+        'user_form': user_form,
+        'perfil_form': perfil_form,
+        'usuario': user,
+    }
+    return render(request, 'usuarios/mi_perfil.html', context)
