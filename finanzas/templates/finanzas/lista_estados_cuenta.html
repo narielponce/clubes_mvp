@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Estados de Cuenta - Socios{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">
+                    <span class="icon has-text-primary">
+                        <i class="fas fa-list"></i>
+                    </span>
+                    Estados de Cuenta - Socios
+                </h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                <a href="{% url 'finanzas:estado_cuenta' %}" class="button is-info">
+                    <span class="icon">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    <span>Mi Estado de Cuenta</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="box">
+        <form method="get" class="columns is-multiline">
+            <div class="column is-4">
+                <div class="field">
+                    <label class="label">Buscar</label>
+                    <div class="control">
+                        <input class="input" type="text" name="q" placeholder="Nombre, apellido, tipo o ID" value="{{ query }}">
+                    </div>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="field">
+                    <label class="label">Tipo de Socio</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="tipo">
+                                <option value="">Todos</option>
+                                {% for tipo in tipos %}
+                                    <option value="{{ tipo.nombre }}" {% if tipo_filtro == tipo.nombre %}selected{% endif %}>
+                                        {{ tipo.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="field">
+                    <label class="label">Estado</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <select name="estado">
+                                <option value="">Todos</option>
+                                <option value="activo" {% if estado_filtro == 'activo' %}selected{% endif %}>Activo</option>
+                                <option value="inactivo" {% if estado_filtro == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="con_deuda" {% if estado_filtro == 'con_deuda' %}selected{% endif %}>Con Deuda</option>
+                                <option value="sin_deuda" {% if estado_filtro == 'sin_deuda' %}selected{% endif %}>Sin Deuda</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-2 is-flex is-align-items-end">
+                <button class="button is-primary is-fullwidth" type="submit">
+                    <span class="icon"><i class="fas fa-search"></i></span>
+                    <span>Buscar</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de Estados de Cuenta -->
+    <div class="box">
+        {% if socios_con_info %}
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th>Socio</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Total Deudas</th>
+                        <th>Total Pagado</th>
+                        <th>Saldo Pendiente</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for info in socios_con_info %}
+                    <tr class="{% if info.tiene_deudas_vencidas %}has-background-danger-light{% elif info.tiene_deudas_pendientes %}has-background-warning-light{% endif %}">
+                        <td>
+                            <div>
+                                <strong>{{ info.socio.perfil_usuario.usuario.get_full_name }}</strong>
+                                <br>
+                                <small class="has-text-grey">ID: {{ info.socio.id }}</small>
+                            </div>
+                        </td>
+                        <td>{{ info.socio.tipo_socio.nombre }}</td>
+                        <td>
+                            {% if info.socio.perfil_usuario.esta_activo_sistema %}
+                                <span class="tag is-success">Activo</span>
+                            {% else %}
+                                <span class="tag is-danger">Inactivo</span>
+                            {% endif %}
+                            {% if info.tiene_deudas_vencidas %}
+                                <br><span class="tag is-danger is-small">Con Deudas Vencidas</span>
+                            {% elif info.tiene_deudas_pendientes %}
+                                <br><span class="tag is-warning is-small">Con Deudas Pendientes</span>
+                            {% endif %}
+                        </td>
+                        <td class="has-text-danger has-text-weight-bold">${{ info.total_deudas|floatformat:0 }}</td>
+                        <td class="has-text-success has-text-weight-bold">${{ info.total_pagado|floatformat:0 }}</td>
+                        <td>
+                            <span class="has-text-weight-bold {% if info.saldo_pendiente > 0 %}has-text-danger{% else %}has-text-success{% endif %}">
+                                ${{ info.saldo_pendiente|floatformat:0 }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="buttons are-small">
+                                <a href="{% url 'finanzas:estado_cuenta_socio' info.socio.id %}" class="button is-info is-light" title="Ver estado de cuenta">
+                                    <span class="icon"><i class="fas fa-eye"></i></span>
+                                    <span>Ver</span>
+                                </a>
+                                {% if info.tiene_deudas_pendientes %}
+                                <a href="{% url 'finanzas:crear_transaccion' %}" class="button is-success is-light" title="Registrar pago">
+                                    <span class="icon"><i class="fas fa-dollar-sign"></i></span>
+                                    <span>Pagar</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Resumen -->
+        <div class="columns is-multiline mt-4">
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Total Socios</p>
+                    <p class="title">{{ socios_con_info|length }}</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Con Deudas</p>
+                    <p class="title has-text-warning">
+                        {{ socios_con_info|dictsortreversed:"saldo_pendiente"|slice:":1"|length }}
+                    </p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Con Deudas Vencidas</p>
+                    <p class="title has-text-danger">
+                        {% for info in socios_con_info %}
+                            {% if info.tiene_deudas_vencidas %}{{ forloop.counter }}{% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Total Pendiente</p>
+                    <p class="title has-text-danger">
+                        ${{ socios_con_info|dictsortreversed:"saldo_pendiente"|slice:":1"|first.saldo_pendiente|floatformat:0 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="has-text-centered">
+            <span class="icon is-large has-text-grey-light">
+                <i class="fas fa-search fa-3x"></i>
+            </span>
+            <h3 class="title is-4 has-text-grey-light">No se encontraron socios</h3>
+            <p class="subtitle">Intenta ajustar los filtros de búsqueda.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

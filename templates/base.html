@@ -13,7 +13,17 @@
         <!-- Sidebar -->
         <div class="column is-2 is-sidebar-menu">
             {% block sidebar_menu %}
-                {% include 'includes/sidebar_menu.html' %}
+                {% if user_role == 'Coordinador' %}
+                    {% include 'includes/sidebar_menu_coordinador.html' with request=request %}
+                {% elif user_role == 'Tesoreria' %}
+                    {% include 'includes/sidebar_menu_tesorero.html' with request=request %}
+                {% elif user_role == 'Comision' %}
+                    {% include 'includes/sidebar_menu_comision.html' with request=request %}
+                {% elif user_role == 'Administrador' %}
+                    {% include 'includes/sidebar_menu.html' with request=request %}
+                {% else %}
+                    {% include 'includes/sidebar_menu.html' with request=request %}
+                {% endif %}
             {% endblock %}
         </div>
 
@@ -42,6 +52,11 @@
                                     <a class="navbar-item" href="{% url 'usuarios:mi_perfil' %}">
                                         Mi perfil
                                     </a>
+                                    {% if request.user.perfil.socio %}
+                                    <a class="navbar-item" href="{% url 'finanzas:estado_cuenta' %}">
+                                        Mi estado de cuenta
+                                    </a>
+                                    {% endif %}
                                     <hr class="navbar-divider">
                                     <a class="navbar-item" href="{% url 'usuarios:logout' %}">
                                         Cerrar sesión

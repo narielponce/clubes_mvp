@@ -329,42 +329,27 @@ def crear_transaccion(request):
         if form.is_valid():
             transaccion = form.save(commit=False)
             transaccion.registrado_por = request.user
+            deuda = form.cleaned_data.get('deuda_relacionada')
+            if deuda:
+                transaccion.deuda_relacionada = deuda
             transaccion.save()
-            
-            # Si es un pago de cuotas y se seleccionó un socio, actualizar su cuenta corriente
-            socio_pago = form.cleaned_data.get('socio_pago')
-            if transaccion.categoria == 'CUOTAS' and socio_pago and transaccion.tipo == 'INGRESO':
-                # Aquí podrías actualizar la cuenta corriente del socio
-                # Por ejemplo, marcar deudas como pagadas o actualizar saldo
+            # Si es un pago de cuotas y se seleccionó una deuda, actualizar su estado
+            if transaccion.categoria == 'CUOTAS' and deuda and transaccion.tipo == 'INGRESO':
                 try:
-                    # Buscar deudas pendientes del socio y marcarlas como pagadas
-                    deudas_pendientes = Deuda.objects.filter(
-                        socio=socio_pago,
-                        estado='PENDIENTE'
-                    ).order_by('fecha_vencimiento')
-                    
-                    monto_restante = transaccion.monto
-                    for deuda in deudas_pendientes:
-                        if monto_restante >= deuda.monto_total:
-                            deuda.estado = 'PAGADA'
-                            deuda.save()
-                            monto_restante -= deuda.monto_total
-                        else:
-                            # Si no alcanza para pagar toda la deuda, crear una transacción parcial
-                            break
-                    
-                    messages.success(request, f'Transacción registrada y aplicada a la cuenta de {socio_pago.perfil_usuario.usuario.get_full_name()}')
+                    if transaccion.monto >= deuda.monto_total:
+                        deuda.estado = 'PAGADA'
+                        deuda.save()
+                    # Si se quiere soportar pagos parciales, aquí se puede agregar lógica adicional
+                    messages.success(request, f'Transacción registrada y aplicada a la deuda de {deuda.socio.perfil_usuario.usuario.get_full_name()}')
                 except Exception as e:
-                    messages.warning(request, f'Transacción registrada pero hubo un problema al actualizar la cuenta del socio: {str(e)}')
+                    messages.warning(request, f'Transacción registrada pero hubo un problema al actualizar la deuda: {str(e)}')
             else:
                 messages.success(request, 'Transacción registrada exitosamente.')
-            
             return redirect('finanzas:lista_transacciones')
     else:
         form = TransaccionForm()
-    
     return render(request, 'finanzas/form_transaccion.html', {
-        'form': form, 
+        'form': form,
         'titulo': 'Registrar Transacción'
     })
 
@@ -495,3 +480,184 @@ def lista_socios_finanzas(request):
         'tipo_selected': tipo,
         'estado_selected': estado,
     })
+
+@login_required
+def consultar_estado_cuenta(request, socio_id=None):
+    """
+    Vista para consultar el estado de cuenta de un socio específico.
+    Los administradores, tesoreros y comisión pueden ver cualquier socio.
+    Los socios solo pueden ver su propio estado de cuenta.
+    """
+    # Determinar qué socio consultar
+    if socio_id:
+        # Si se proporciona un socio_id, verificar permisos
+        if request.user.groups.filter(name__in=['Administrador', 'Tesoreria', 'Comision']).exists():
+            # Administradores, tesoreros y comisión pueden ver cualquier socio
+            socio = get_object_or_404(Socio, id=socio_id)
+        else:
+            # Otros usuarios solo pueden ver su propio estado de cuenta
+            if hasattr(request.user.perfil, 'socio') and request.user.perfil.socio.id == socio_id:
+                socio = request.user.perfil.socio
+            else:
+                messages.error(request, 'No tienes permisos para ver el estado de cuenta de otro socio.')
+                return redirect('usuarios:dashboard')
+    else:
+        # Si no se proporciona socio_id, mostrar el estado de cuenta del usuario actual
+        if hasattr(request.user.perfil, 'socio'):
+            socio = request.user.perfil.socio
+        else:
+            messages.error(request, 'No tienes un perfil de socio asociado.')
+            return redirect('usuarios:dashboard')
+    
+    # Obtener deudas del socio
+    deudas = socio.deudas.all().order_by('-fecha_generacion')
+    
+    # Obtener transacciones relacionadas con el socio
+    transacciones = Transaccion.objects.filter(
+        deuda_relacionada__socio=socio,
+        categoria='CUOTAS',
+        tipo='INGRESO'
+    ).order_by('-fecha')
+    
+    # Calcular totales
+    total_deudas = sum(deuda.monto_total for deuda in deudas if deuda.estado in ['PENDIENTE', 'VENCIDA'])
+    total_pagado = sum(transaccion.monto for transaccion in transacciones)
+    saldo_pendiente = total_deudas - total_pagado
+    
+    # Obtener deudas por estado
+    deudas_pendientes = deudas.filter(estado='PENDIENTE')
+    deudas_vencidas = deudas.filter(estado='VENCIDA')
+    deudas_pagadas = deudas.filter(estado='PAGADA')
+    
+    # Crear listado cronológico combinando deudas y pagos
+    movimientos = []
+    
+    # Agregar todas las deudas al listado (incluyendo pagadas)
+    for deuda in deudas:
+        for item in deuda.items.all():
+            movimientos.append({
+                'fecha': deuda.fecha_generacion,
+                'concepto': item.descripcion,
+                'importe': -item.monto,  # Negativo porque es una deuda
+                'tipo': 'deuda',
+                'deuda': deuda,
+                'item': item
+            })
+    
+    # Agregar pagos al listado
+    for transaccion in transacciones:
+        movimientos.append({
+            'fecha': transaccion.fecha,
+            'concepto': f"Pago de {transaccion.descripcion.lower()}",
+            'importe': transaccion.monto,  # Positivo porque es un pago
+            'tipo': 'pago',
+            'transaccion': transaccion
+        })
+    
+    # Ordenar movimientos por fecha (más reciente primero)
+    movimientos.sort(key=lambda x: x['fecha'], reverse=True)
+    
+    # Información adicional para usuarios con roles de gestión
+    es_usuario_actual = (request.user.perfil.socio == socio if hasattr(request.user.perfil, 'socio') else False)
+    tiene_roles_gestion = request.user.groups.filter(name__in=['Administrador', 'Tesoreria', 'Comision', 'Coordinador']).exists()
+    
+    # Estadísticas adicionales
+    total_deudas_generadas = deudas.count()
+    deudas_ultimo_mes = deudas.filter(fecha_generacion__gte=timezone.now().date() - timezone.timedelta(days=30)).count()
+    pagos_ultimo_mes = transacciones.filter(fecha__gte=timezone.now().date() - timezone.timedelta(days=30)).count()
+    
+    context = {
+        'socio': socio,
+        'deudas': deudas,
+        'transacciones': transacciones,
+        'movimientos': movimientos,
+        'total_deudas': total_deudas,
+        'total_pagado': total_pagado,
+        'saldo_pendiente': saldo_pendiente,
+        'deudas_pendientes': deudas_pendientes,
+        'deudas_vencidas': deudas_vencidas,
+        'deudas_pagadas': deudas_pagadas,
+        'puede_editar': request.user.groups.filter(name__in=['Administrador', 'Tesoreria']).exists(),
+        'es_usuario_actual': es_usuario_actual,
+        'tiene_roles_gestion': tiene_roles_gestion,
+        'total_deudas_generadas': total_deudas_generadas,
+        'deudas_ultimo_mes': deudas_ultimo_mes,
+        'pagos_ultimo_mes': pagos_ultimo_mes,
+    }
+    
+    return render(request, 'finanzas/estado_cuenta.html', context)
+
+@login_required
+def lista_estados_cuenta(request):
+    """
+    Vista para listar todos los estados de cuenta (solo para administradores, tesoreros y comisión)
+    """
+    if not request.user.groups.filter(name__in=['Administrador', 'Tesoreria', 'Comision']).exists():
+        messages.error(request, 'No tienes permisos para acceder a esta funcionalidad.')
+        return redirect('usuarios:dashboard')
+    
+    # Filtros
+    query = request.GET.get('q', '').strip()
+    estado_filtro = request.GET.get('estado', '').strip()
+    tipo_filtro = request.GET.get('tipo', '').strip()
+    
+    socios = Socio.objects.select_related('perfil_usuario', 'tipo_socio').all()
+    
+    # Aplicar filtros
+    if query:
+        socios = socios.filter(
+            Q(perfil_usuario__usuario__first_name__icontains=query) |
+            Q(perfil_usuario__usuario__last_name__icontains=query) |
+            Q(tipo_socio__nombre__icontains=query) |
+            Q(id__icontains=query)
+        )
+    
+    if tipo_filtro:
+        socios = socios.filter(tipo_socio__nombre=tipo_filtro)
+    
+    if estado_filtro:
+        if estado_filtro == 'activo':
+            socios = socios.filter(perfil_usuario__esta_activo_sistema=True)
+        elif estado_filtro == 'inactivo':
+            socios = socios.filter(perfil_usuario__esta_activo_sistema=False)
+        elif estado_filtro == 'con_deuda':
+            socios = socios.filter(deudas__estado__in=['PENDIENTE', 'VENCIDA']).distinct()
+        elif estado_filtro == 'sin_deuda':
+            socios = socios.exclude(deudas__estado__in=['PENDIENTE', 'VENCIDA'])
+    
+    # Calcular información financiera para cada socio
+    socios_con_info = []
+    for socio in socios:
+        deudas_pendientes = socio.deudas.filter(estado__in=['PENDIENTE', 'VENCIDA'])
+        total_deudas = sum(deuda.monto_total for deuda in deudas_pendientes)
+        transacciones = Transaccion.objects.filter(
+            deuda_relacionada__socio=socio,
+            categoria='CUOTAS',
+            tipo='INGRESO'
+        )
+        total_pagado = sum(transaccion.monto for transaccion in transacciones)
+        saldo_pendiente = total_deudas - total_pagado
+        
+        socios_con_info.append({
+            'socio': socio,
+            'total_deudas': total_deudas,
+            'total_pagado': total_pagado,
+            'saldo_pendiente': saldo_pendiente,
+            'tiene_deudas_pendientes': total_deudas > 0,
+            'tiene_deudas_vencidas': socio.deudas.filter(estado='VENCIDA').exists(),
+        })
+    
+    # Ordenar por saldo pendiente (mayor a menor)
+    socios_con_info.sort(key=lambda x: x['saldo_pendiente'], reverse=True)
+    
+    tipos = TipoSocio.objects.all()
+    
+    context = {
+        'socios_con_info': socios_con_info,
+        'tipos': tipos,
+        'query': query,
+        'estado_filtro': estado_filtro,
+        'tipo_filtro': tipo_filtro,
+    }
+    
+    return render(request, 'finanzas/lista_estados_cuenta.html', context)

@@ -8,12 +8,13 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import PerfilUsuario
 from .forms import UsuarioForm, PerfilUsuarioForm, MiUsuarioForm, MiPerfilUsuarioForm
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.db.models import Q
 from .decorators import verificar_rol
 from socios.models import Socio
 from disciplinas.models import Disciplina, Categoria, Inscripcion
-from finanzas.models import Cuenta, Deuda
+from finanzas.models import Cuenta, Deuda, Transaccion
+from django.utils import timezone
 
 def is_admin(user):
     return user.groups.filter(name='Administrador').exists()
@@ -127,6 +128,14 @@ def dashboard(request):
     elif 'Comision' in grupos:
         template = 'usuarios/dash_comision.html'
         rol = 'Comision'
+        
+        context = {
+            'rol': rol,
+            'es_socio': es_socio,
+            'perfil': perfil,
+            'socio': perfil.socio if es_socio else None,
+        }
+        return render(request, template, context)
     else:
         # Si no tiene rol administrativo pero es socio, redirigir a su área de socio
         if es_socio:
@@ -369,49 +378,54 @@ def asignar_grupo(request):
         return JsonResponse({'success': False, 'message': 'Usuario o grupo no encontrado'})
 
 @login_required
-@user_passes_test(is_coordinador)
-def dash_coordinador(request):
-    """Dashboard específico para coordinadores con acciones rápidas"""
-    perfil = request.user.perfil
-    
-    # Obtener estadísticas para el coordinador
-    disciplinas_coordinadas = Disciplina.objects.filter(coordinador=perfil, activa=True)
-    disciplinas_count = disciplinas_coordinadas.count()
-    categorias_count = Categoria.objects.filter(disciplina__in=disciplinas_coordinadas).count()
+@user_passes_test(lambda u: u.groups.filter(name='Coordinador').exists())
+def dashboard_coordinador(request):
+    """Dashboard específico para coordinadores"""
+    # Obtener información básica del coordinador
+    disciplinas_count = Disciplina.objects.filter(profesores=request.user).count()
     total_inscritos = Inscripcion.objects.filter(
-        categoria__disciplina__in=disciplinas_coordinadas,
-        activa=True
+        categoria__disciplina__profesores=request.user
+    ).count()
+    categorias_count = Categoria.objects.filter(
+        disciplina__profesores=request.user
     ).count()
     
-    # Obtener inscripciones recientes
+    # Inscripciones recientes (últimas 5)
     inscripciones_recientes = Inscripcion.objects.filter(
-        categoria__disciplina__in=disciplinas_coordinadas,
-        activa=True
-    ).select_related(
-        'socio__perfil_usuario__usuario',
-        'categoria__disciplina'
-    ).order_by('-fecha_inscripcion')[:5]
+        categoria__disciplina__profesores=request.user
+    ).select_related('socio__perfil_usuario__usuario', 'categoria__disciplina').order_by('-fecha_inscripcion')[:5]
     
-    # Obtener categorías con cupo disponible
+    # Categorías con cupo disponible
     categorias_con_cupo = []
-    for categoria in Categoria.objects.filter(disciplina__in=disciplinas_coordinadas):
-        inscritos_activos = categoria.inscritos.filter(activa=True).count()
-        cupo_disponible = categoria.cupo_maximo - inscritos_activos
+    categorias_coordinador = Categoria.objects.filter(
+        disciplina__profesores=request.user
+    ).select_related('disciplina')
+    
+    for categoria in categorias_coordinador:
+        inscritos_actuales = Inscripcion.objects.filter(categoria=categoria).count()
+        cupo_disponible = categoria.cupo_maximo - inscritos_actuales
         if cupo_disponible > 0:
             categorias_con_cupo.append({
                 'categoria': categoria,
-                'cupo_disponible': cupo_disponible,
-                'inscritos_actuales': inscritos_activos
+                'inscritos_actuales': inscritos_actuales,
+                'cupo_disponible': cupo_disponible
             })
     
+    # Verificar si el usuario también es socio
+    es_socio = hasattr(request.user.perfil, 'socio')
+    socio = None
+    if es_socio:
+        socio = request.user.perfil.socio
+    
     context = {
-        'perfil': perfil,
         'disciplinas_count': disciplinas_count,
-        'categorias_count': categorias_count,
         'total_inscritos': total_inscritos,
+        'categorias_count': categorias_count,
+        'eventos_count': 0,  # Placeholder para futuras implementaciones
         'inscripciones_recientes': inscripciones_recientes,
         'categorias_con_cupo': categorias_con_cupo,
-        'disciplinas_coordinadas': disciplinas_coordinadas,
+        'es_socio': es_socio,
+        'socio': socio,
     }
     
     return render(request, 'usuarios/dash_coordinador.html', context)
@@ -449,3 +463,82 @@ def mi_perfil(request):
         'usuario': user,
     }
     return render(request, 'usuarios/mi_perfil.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='Tesoreria').exists())
+def dashboard_tesorero(request):
+    """Dashboard específico para tesoreros"""
+    # Obtener estadísticas financieras
+    total_socios = Socio.objects.filter(esta_activo=True).count()
+    deudas_pendientes = Deuda.objects.filter(estado__in=['PENDIENTE', 'VENCIDA']).count()
+    
+    # Calcular ingresos del mes actual
+    inicio_mes = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    ingresos_mes = Transaccion.objects.filter(
+        tipo='INGRESO',
+        fecha__gte=inicio_mes
+    ).aggregate(total=Sum('monto'))['total'] or 0
+    
+    cuentas_activas = Cuenta.objects.filter(activa=True).count()
+    
+    # Deudas recientes (últimas 10)
+    deudas_recientes = Deuda.objects.filter(
+        estado__in=['PENDIENTE', 'VENCIDA']
+    ).select_related('socio__perfil_usuario__usuario').order_by('-fecha_generacion')[:10]
+    
+    # Verificar si el usuario también es socio
+    es_socio = hasattr(request.user.perfil, 'socio')
+    socio = None
+    if es_socio:
+        socio = request.user.perfil.socio
+    
+    context = {
+        'total_socios': total_socios,
+        'deudas_pendientes': deudas_pendientes,
+        'ingresos_mes': ingresos_mes,
+        'cuentas_activas': cuentas_activas,
+        'deudas_recientes': deudas_recientes,
+        'es_socio': es_socio,
+        'socio': socio,
+    }
+    
+    return render(request, 'usuarios/dash_tesorero.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='Comision').exists())
+def dashboard_comision(request):
+    """Dashboard específico para comisión"""
+    # Obtener estadísticas generales
+    total_socios = Socio.objects.filter(esta_activo=True).count()
+    disciplinas_activas = Disciplina.objects.filter(activa=True).count()
+    deudas_pendientes = Deuda.objects.filter(estado__in=['PENDIENTE', 'VENCIDA']).count()
+    
+    # Calcular ingresos del mes actual
+    inicio_mes = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    ingresos_mes = Transaccion.objects.filter(
+        tipo='INGRESO',
+        fecha__gte=inicio_mes
+    ).aggregate(total=Sum('monto'))['total'] or 0
+    
+    # Socios recientes (últimos 10)
+    socios_recientes = Socio.objects.filter(
+        esta_activo=True
+    ).select_related('perfil_usuario__usuario', 'tipo_socio').order_by('-fecha_afiliacion')[:10]
+    
+    # Verificar si el usuario también es socio
+    es_socio = hasattr(request.user.perfil, 'socio')
+    socio = None
+    if es_socio:
+        socio = request.user.perfil.socio
+    
+    context = {
+        'total_socios': total_socios,
+        'disciplinas_activas': disciplinas_activas,
+        'deudas_pendientes': deudas_pendientes,
+        'ingresos_mes': ingresos_mes,
+        'socios_recientes': socios_recientes,
+        'es_socio': es_socio,
+        'socio': socio,
+    }
+    
+    return render(request, 'usuarios/dash_comision.html', context)

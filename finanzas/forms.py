@@ -54,14 +54,6 @@ class ItemDeudaForm(forms.ModelForm):
             self.fields['categoria'].queryset = self.instance.disciplina.categorias.all()
 
 class TransaccionForm(forms.ModelForm):
-    socio_pago = forms.ModelChoiceField(
-        queryset=Socio.objects.all(),
-        required=False,
-        empty_label="Seleccionar socio...",
-        label="Socio (para cuotas)",
-        help_text="Selecciona el socio al cual imputar el pago"
-    )
-    
     class Meta:
         model = Transaccion
         fields = ['cuenta', 'tipo', 'categoria', 'monto', 'descripcion', 'fecha', 'referencia', 'deuda_relacionada']
@@ -80,24 +72,17 @@ class TransaccionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Hacer deuda_relacionada opcional
         self.fields['deuda_relacionada'].required = False
-        # Filtrar solo deudas pendientes
-        self.fields['deuda_relacionada'].queryset = Deuda.objects.filter(estado='PENDIENTE')
-        
-        # Configurar el campo socio_pago sin estilos inline
-        self.fields['socio_pago'].widget.attrs.update({
-            'class': 'select'
-        })
-    
+        # Filtrar solo deudas pendientes o vencidas
+        self.fields['deuda_relacionada'].queryset = Deuda.objects.filter(estado__in=['PENDIENTE', 'VENCIDA'])
+
     def clean(self):
         cleaned_data = super().clean()
+        # Si la categoría es CUOTAS Y el tipo es INGRESO, la deuda es obligatoria
         categoria = cleaned_data.get('categoria')
         tipo = cleaned_data.get('tipo')
-        socio_pago = cleaned_data.get('socio_pago')
-        
-        # Si la categoría es CUOTAS Y el tipo es INGRESO, el socio es obligatorio
-        if categoria == 'CUOTAS' and tipo == 'INGRESO' and not socio_pago:
-            self.add_error('socio_pago', 'Debe seleccionar un socio cuando la categoría es "Cuotas de Socios" y el tipo es "Ingreso"')
-        
+        deuda_relacionada = cleaned_data.get('deuda_relacionada')
+        if categoria == 'CUOTAS' and tipo == 'INGRESO' and not deuda_relacionada:
+            self.add_error('deuda_relacionada', 'Debe seleccionar una deuda a pagar cuando la categoría es "Cuotas de Socios" y el tipo es "Ingreso"')
         return cleaned_data
 
 class ComprobanteForm(forms.ModelForm):

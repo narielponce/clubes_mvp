@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}Estado de Cuenta - {{ socio.perfil_usuario.usuario.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="level">
+        <div class="level-left">
+            <div class="level-item">
+                <h1 class="title">
+                    <span class="icon has-text-primary">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </span>
+                    Estado de Cuenta
+                    {% if es_usuario_actual %}
+                        <span class="tag is-info is-medium ml-2">Mi Estado de Cuenta</span>
+                    {% endif %}
+                </h1>
+            </div>
+        </div>
+        <div class="level-right">
+            <div class="level-item">
+                {% if puede_editar %}
+                <a href="{% url 'finanzas:crear_transaccion' %}" class="button is-primary">
+                    <span class="icon">
+                        <i class="fas fa-plus"></i>
+                    </span>
+                    <span>Registrar Pago</span>
+                </a>
+                {% endif %}
+                <a href="{% url 'usuarios:dashboard' %}" class="button is-light ml-2">
+                    <span class="icon">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                    <span>Volver</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Socio -->
+    <div class="box">
+        <div class="columns is-multiline">
+            <div class="column is-6">
+                <h3 class="title is-4">Información del Socio</h3>
+                <div class="content">
+                    <p><strong>Nombre:</strong> {{ socio.perfil_usuario.usuario.get_full_name }}</p>
+                    <p><strong>Tipo de Socio:</strong> {{ socio.tipo_socio.nombre }}</p>
+                    <p><strong>Fecha de Afiliación:</strong> {{ socio.fecha_afiliacion|date:"d/m/Y" }}</p>
+                    <p><strong>Tiempo como Socio:</strong> {{ socio.tiempo_socio }}</p>
+                    <p><strong>Estado:</strong> 
+                        <span class="tag {% if socio.esta_activo %}is-success{% else %}is-danger{% endif %}">
+                            {{ socio.get_estado_display }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div class="column is-6">
+                <h3 class="title is-4">Resumen Financiero</h3>
+                <div class="content">
+                    <div class="columns is-multiline">
+                        <div class="column is-6">
+                            <div class="box has-text-centered">
+                                <p class="heading">Total Deudas</p>
+                                <p class="title has-text-danger">${{ total_deudas|floatformat:0 }}</p>
+                            </div>
+                        </div>
+                        <div class="column is-6">
+                            <div class="box has-text-centered">
+                                <p class="heading">Total Pagado</p>
+                                <p class="title has-text-success">${{ total_pagado|floatformat:0 }}</p>
+                            </div>
+                        </div>
+                        <div class="column is-12">
+                            <div class="box has-text-centered {% if saldo_pendiente > 0 %}has-background-danger-light{% else %}has-background-success-light{% endif %}">
+                                <p class="heading">Saldo Pendiente</p>
+                                <p class="title {% if saldo_pendiente > 0 %}has-text-danger{% else %}has-text-success{% endif %}">
+                                    ${{ saldo_pendiente|floatformat:0 }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional para usuarios con roles de gestión -->
+    {% if tiene_roles_gestion and es_usuario_actual %}
+    <div class="box">
+        <h3 class="title is-4">
+            <span class="icon has-text-info">
+                <i class="fas fa-chart-bar"></i>
+            </span>
+            Estadísticas Adicionales
+        </h3>
+        <div class="columns is-multiline">
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Total Deudas Generadas</p>
+                    <p class="title">{{ total_deudas_generadas }}</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Deudas Último Mes</p>
+                    <p class="title">{{ deudas_ultimo_mes }}</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Pagos Último Mes</p>
+                    <p class="title">{{ pagos_ultimo_mes }}</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Deudas Vencidas</p>
+                    <p class="title has-text-danger">{{ deudas_vencidas.count }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="notification is-info is-light">
+            <p class="is-size-7">
+                <span class="icon">
+                    <i class="fas fa-info-circle"></i>
+                </span>
+                <span>Como usuario con roles de gestión, puedes ver estadísticas adicionales de tu cuenta. Para gestionar estados de cuenta de otros socios, usa el menú correspondiente a tu rol.</span>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Listado Cronológico de Movimientos -->
+    {% if movimientos %}
+    <div class="box">
+        <h3 class="title is-4">
+            <span class="icon has-text-primary">
+                <i class="fas fa-list"></i>
+            </span>
+            Historial de Movimientos
+        </h3>
+        
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Fecha</th>
+                        <th>Concepto</th>
+                        <th class="has-text-right" style="width: 150px;">Importe</th>
+                        <th style="width: 100px;">Estado</th>
+                        {% if puede_editar %}
+                        <th style="width: 100px;">Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movimiento in movimientos %}
+                    <tr>
+                        <td>
+                            <span class="has-text-weight-semibold">{{ movimiento.fecha|date:"d/m/Y" }}</span>
+                        </td>
+                        <td>
+                            {% if movimiento.tipo == 'deuda' %}
+                                <div class="level is-mobile mb-0">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <span class="icon has-text-danger">
+                                                <i class="fas fa-minus-circle"></i>
+                                            </span>
+                                        </div>
+                                        <div class="level-item">
+                                            <div>
+                                                <strong>{{ movimiento.concepto }}</strong>
+                                                {% if movimiento.deuda.observaciones %}
+                                                    <br><small class="has-text-grey">{{ movimiento.deuda.observaciones }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="level is-mobile mb-0">
+                                    <div class="level-left">
+                                        <div class="level-item">
+                                            <span class="icon has-text-success">
+                                                <i class="fas fa-plus-circle"></i>
+                                            </span>
+                                        </div>
+                                        <div class="level-item">
+                                            <div>
+                                                <strong>{{ movimiento.concepto }}</strong>
+                                                {% if movimiento.transaccion.referencia %}
+                                                    <br><small class="has-text-grey">Ref: {{ movimiento.transaccion.referencia }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="has-text-right">
+                            <span class="has-text-weight-bold {% if movimiento.importe < 0 %}has-text-danger{% else %}has-text-success{% endif %}">
+                                {% if movimiento.importe < 0 %}-{% endif %}${{ movimiento.importe|floatformat:0|cut:"-" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if movimiento.tipo == 'deuda' %}
+                                {% if movimiento.deuda.estado == 'PENDIENTE' %}
+                                    <span class="tag is-warning is-small">Pendiente</span>
+                                {% elif movimiento.deuda.estado == 'VENCIDA' %}
+                                    <span class="tag is-danger is-small">Vencida</span>
+                                {% elif movimiento.deuda.estado == 'PAGADA' %}
+                                    <span class="tag is-success is-small">Pagada</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="tag is-success is-small">Pagado</span>
+                            {% endif %}
+                        </td>
+                        {% if puede_editar %}
+                        <td>
+                            {% if movimiento.tipo == 'deuda' and movimiento.deuda.estado in 'PENDIENTE,VENCIDA' %}
+                                <a href="{% url 'finanzas:crear_transaccion' %}?deuda={{ movimiento.deuda.id }}" class="button is-small is-success">
+                                    <span class="icon"><i class="fas fa-dollar-sign"></i></span>
+                                    <span>Pagar</span>
+                                </a>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Resumen de movimientos -->
+        <div class="columns is-multiline mt-4">
+            <div class="column is-4">
+                <div class="box has-text-centered">
+                    <p class="heading">Total Deudas</p>
+                    <p class="title has-text-danger">${{ total_deudas|floatformat:0 }}</p>
+                </div>
+            </div>
+            <div class="column is-4">
+                <div class="box has-text-centered">
+                    <p class="heading">Total Pagado</p>
+                    <p class="title has-text-success">${{ total_pagado|floatformat:0 }}</p>
+                </div>
+            </div>
+            <div class="column is-4">
+                <div class="box has-text-centered {% if saldo_pendiente > 0 %}has-background-danger-light{% else %}has-background-success-light{% endif %}">
+                    <p class="heading">Saldo Pendiente</p>
+                    <p class="title {% if saldo_pendiente > 0 %}has-text-danger{% else %}has-text-success{% endif %}">
+                        ${{ saldo_pendiente|floatformat:0 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leyenda -->
+        <div class="notification is-light mt-4">
+            <div class="columns is-multiline">
+                <div class="column is-6">
+                    <p class="is-size-7">
+                        <span class="icon has-text-danger">
+                            <i class="fas fa-minus-circle"></i>
+                        </span>
+                        <span><strong>Deudas:</strong> Cuotas societarias, deportivas y otros cargos generados automáticamente</span>
+                    </p>
+                </div>
+                <div class="column is-6">
+                    <p class="is-size-7">
+                        <span class="icon has-text-success">
+                            <i class="fas fa-plus-circle"></i>
+                        </span>
+                        <span><strong>Pagos:</strong> Transacciones registradas para saldar las deudas pendientes</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Deudas Pendientes -->
+    {% if deudas_pendientes or deudas_vencidas %}
+    <div class="box">
+        <h3 class="title is-4">
+            <span class="icon has-text-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </span>
+            Deudas Pendientes
+        </h3>
+        
+        {% if deudas_vencidas %}
+        <div class="notification is-danger is-light mb-4">
+            <p><strong>¡Atención!</strong> Tienes deudas vencidas que requieren atención inmediata.</p>
+        </div>
+        {% endif %}
+        
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th>Fecha Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Monto</th>
+                        <th>Items</th>
+                        <th>Observaciones</th>
+                        {% if puede_editar %}
+                        <th>Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for deuda in deudas_vencidas %}
+                    <tr class="has-background-danger-light">
+                        <td>
+                            <span class="has-text-danger has-text-weight-bold">
+                                {{ deuda.fecha_vencimiento|date:"d/m/Y" }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="tag is-danger">Vencida</span>
+                        </td>
+                        <td class="has-text-weight-bold">${{ deuda.monto_total|floatformat:0 }}</td>
+                        <td>
+                            {% for item in deuda.items.all %}
+                            <div class="is-size-7">{{ item.descripcion }} - ${{ item.monto|floatformat:0 }}</div>
+                            {% endfor %}
+                        </td>
+                        <td>{{ deuda.observaciones|default:"-" }}</td>
+                        {% if puede_editar %}
+                        <td>
+                            <a href="{% url 'finanzas:crear_transaccion' %}?deuda={{ deuda.id }}" class="button is-small is-success">
+                                <span class="icon"><i class="fas fa-dollar-sign"></i></span>
+                                <span>Pagar</span>
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                    
+                    {% for deuda in deudas_pendientes %}
+                    <tr>
+                        <td>{{ deuda.fecha_vencimiento|date:"d/m/Y" }}</td>
+                        <td>
+                            <span class="tag is-warning">Pendiente</span>
+                        </td>
+                        <td class="has-text-weight-bold">${{ deuda.monto_total|floatformat:0 }}</td>
+                        <td>
+                            {% for item in deuda.items.all %}
+                            <div class="is-size-7">{{ item.descripcion }} - ${{ item.monto|floatformat:0 }}</div>
+                            {% endfor %}
+                        </td>
+                        <td>{{ deuda.observaciones|default:"-" }}</td>
+                        {% if puede_editar %}
+                        <td>
+                            <a href="{% url 'finanzas:crear_transaccion' %}?deuda={{ deuda.id }}" class="button is-small is-success">
+                                <span class="icon"><i class="fas fa-dollar-sign"></i></span>
+                                <span>Pagar</span>
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not movimientos and not deudas_pendientes and not deudas_vencidas %}
+    <div class="box">
+        <div class="has-text-centered">
+            <span class="icon is-large has-text-success">
+                <i class="fas fa-check-circle fa-3x"></i>
+            </span>
+            <h3 class="title is-4 has-text-success">¡Excelente!</h3>
+            <p class="subtitle">No tienes deudas pendientes ni historial de transacciones.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

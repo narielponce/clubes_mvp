@@ -25,6 +25,72 @@
         </div>
     </div>
 
+    <!-- Información del Estado de Cuenta (si es socio) -->
+    {% if request.user.perfil.socio %}
+    <div class="box mb-4">
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h3 class="title is-4">
+                        <span class="icon has-text-info">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </span>
+                        Estado de Cuenta
+                    </h3>
+                </div>
+            </div>
+            <div class="level-right">
+                <div class="level-item">
+                    <a href="{% url 'finanzas:estado_cuenta' %}" class="button is-info">
+                        <span class="icon">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                        <span>Ver Estado Completo</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="columns is-multiline">
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Tipo de Socio</p>
+                    <p class="title is-5">{{ request.user.perfil.socio.tipo_socio.nombre }}</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Fecha de Afiliación</p>
+                    <p class="title is-5">{{ request.user.perfil.socio.fecha_afiliacion|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Estado</p>
+                    <span class="tag {% if request.user.perfil.socio.esta_activo %}is-success{% else %}is-danger{% endif %} is-medium">
+                        {{ request.user.perfil.socio.get_estado_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="column is-3">
+                <div class="box has-text-centered">
+                    <p class="heading">Tiempo como Socio</p>
+                    <p class="title is-5">{{ request.user.perfil.socio.tiempo_socio }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="notification is-info is-light">
+            <p class="is-size-7">
+                <span class="icon">
+                    <i class="fas fa-info-circle"></i>
+                </span>
+                <span>Como socio, puedes consultar tu estado de cuenta, deudas pendientes e historial de pagos haciendo clic en "Ver Estado Completo".</span>
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
     <form method="post" class="box">
         {% csrf_token %}
         

@@ -29,6 +29,11 @@ urlpatterns = [
     # Comprobantes
     path('transacciones/<int:transaccion_id>/comprobante/', views.agregar_comprobante, name='agregar_comprobante'),
     
+    # Estado de Cuenta
+    path('estado-cuenta/', views.consultar_estado_cuenta, name='estado_cuenta'),
+    path('estado-cuenta/<int:socio_id>/', views.consultar_estado_cuenta, name='estado_cuenta_socio'),
+    path('estados-cuenta/', views.lista_estados_cuenta, name='lista_estados_cuenta'),
+    
     # API
     path('api/categorias-disciplina/', views.get_categorias_disciplina, name='get_categorias_disciplina'),
     path('socios/', views.lista_socios_finanzas, name='lista_socios_finanzas'),

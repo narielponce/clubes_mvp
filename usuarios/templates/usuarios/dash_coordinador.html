@@ -4,44 +4,69 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="title">Gestión Deportistas</h1>
-    <p class="subtitle">Panel de control para la gestión integral de deportistas</p>
+    <h1 class="title">Panel de Coordinador</h1>
     
-    <div class="columns">
-        <!-- Acciones Rápidas -->
-        <div class="column is-8">
-            <div class="box">
-                <h3 class="title is-5">Acciones Rápidas</h3>
-                <div class="buttons">
-                    <a href="{% url 'disciplinas:nueva_inscripcion' %}" class="button is-primary is-small">
-                        <span class="icon">
-                            <i class="fas fa-user-plus"></i>
-                        </span>
-                        <span>Nueva Inscripción</span>
-                    </a>
-                    <a href="{% url 'disciplinas:lista_inscripciones' %}" class="button is-info is-small">
-                        <span class="icon">
-                            <i class="fas fa-list"></i>
-                        </span>
-                        <span>Ver Inscripciones</span>
-                    </a>
-                    <a href="#" class="button is-success is-small">
-                        <span class="icon">
-                            <i class="fas fa-chart-bar"></i>
-                        </span>
-                        <span>Reportes</span>
-                    </a>
-                    <a href="#" class="button is-warning is-small">
-                        <span class="icon">
-                            <i class="fas fa-clock"></i>
-                        </span>
-                        <span>Gestionar Horarios</span>
-                    </a>
-                </div>
+    {% if es_socio %}
+    <div class="notification is-info">
+        <p class="title is-6">Información de Socio</p>
+        <ul>
+            <li><strong>Tipo de Socio:</strong> {{ socio.tipo_socio.get_nombre_display }}</li>
+            <li><strong>Estado:</strong> 
+                <span class="tag {% if socio.esta_activo %}is-success{% else %}is-danger{% endif %}">
+                    {{ socio.get_estado_display }}
+                </span>
+            </li>
+            <li><strong>Fecha de Afiliación:</strong> {{ socio.fecha_afiliacion|date:"d/m/Y" }}</li>
+            <li><strong>Tiempo como Socio:</strong> {{ socio.tiempo_socio }}</li>
+        </ul>
+        <div class="buttons">
+            <a href="{% url 'socios:area' %}" class="button is-primary">Ver Área de Socio</a>
+            <a href="{% url 'finanzas:estado_cuenta' %}" class="button is-info">
+                <span class="icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </span>
+                <span>Mi Estado de Cuenta</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="columns is-multiline">
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Mis Disciplinas</p>
+                <p class="title">{{ disciplinas_count|default:"0" }}</p>
+                <p class="help">Disciplinas coordinadas</p>
             </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Total Inscritos</p>
+                <p class="title">{{ total_inscritos|default:"0" }}</p>
+                <p class="help">Deportistas activos</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Categorías Activas</p>
+                <p class="title">{{ categorias_count|default:"0" }}</p>
+                <p class="help">Categorías disponibles</p>
+            </div>
+        </div>
+        <div class="column is-3">
+            <div class="box has-text-centered">
+                <p class="heading">Próximos Eventos</p>
+                <p class="title">{{ eventos_count|default:"0" }}</p>
+                <p class="help">Eventos programados</p>
+            </div>
+        </div>
+    </div>
 
+    <!-- Panel lateral -->
+    <div class="columns is-multiline">
+        <div class="column is-8">
             <!-- Inscripciones Recientes -->
-            <div class="box mt-4">
+            <div class="box">
                 <h3 class="title is-5">Inscripciones Recientes</h3>
                 {% if inscripciones_recientes %}
                     <div class="table-container">
@@ -49,33 +74,19 @@
                             <thead>
                                 <tr>
                                     <th>Socio</th>
-                                    <th>Disciplina</th>
                                     <th>Categoría</th>
+                                    <th>Disciplina</th>
                                     <th>Fecha</th>
-                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for inscripcion in inscripciones_recientes %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ inscripcion.socio.perfil_usuario.usuario.get_full_name }}</strong>
-                                        </td>
-                                        <td>{{ inscripcion.categoria.disciplina.nombre }}</td>
-                                        <td>{{ inscripcion.categoria.nombre }}</td>
-                                        <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}</td>
-                                        <td>
-                                            <div class="buttons are-small">
-                                                <a href="{% url 'disciplinas:cancelar_inscripcion_admin' inscripcion.pk %}" 
-                                                   class="button is-danger is-outlined"
-                                                   title="Cancelar inscripción">
-                                                    <span class="icon">
-                                                        <i class="fas fa-times"></i>
-                                                    </span>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td>{{ inscripcion.socio.perfil_usuario.usuario.get_full_name }}</td>
+                                    <td>{{ inscripcion.categoria.nombre }}</td>
+                                    <td>{{ inscripcion.categoria.disciplina.nombre }}</td>
+                                    <td>{{ inscripcion.fecha_inscripcion|date:"d/m/Y" }}</td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -116,6 +127,9 @@
                     <ul>
                         <li><a href="{% url 'disciplinas:lista' %}">Mis Disciplinas</a></li>
                         <li><a href="{% url 'disciplinas:lista_categorias' %}">Categorías</a></li>
+                        {% if es_socio %}
+                        <li><a href="{% url 'finanzas:estado_cuenta' %}">Mi Estado de Cuenta</a></li>
+                        {% endif %}
                         <li><a href="#">Comunicaciones</a></li>
                         <li><a href="#">Documentación</a></li>
                     </ul>

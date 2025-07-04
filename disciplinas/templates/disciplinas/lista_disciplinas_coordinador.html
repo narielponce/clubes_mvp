@@ -34,17 +34,12 @@
                 </td>
                 <td>
                     <div class="buttons are-small">
-                        <a href="{% url 'disciplinas:detalle_disciplina' disciplina.pk %}"
-                            class="button is-small is-info" title="Ver Detalle">
-                            <span class="icon is-small">
-                                <i class="fas fa-eye"></i>
-                            </span>
-                        </a>
                         <a href="{% url 'disciplinas:inscribir_socios' disciplina.pk %}"
-                            class="button is-small is-primary" title="Inscribir Socios">
+                            class="button is-small is-link" title="Inscribir Socios">
                             <span class="icon is-small">
                                 <i class="fas fa-user-plus"></i>
-                            </span>
+                            </span> 
+                            <span class="is-size-7">Inscribir socios a actividad</span>
                         </a>
                     </div>
                 </td>
@@ -59,7 +54,7 @@
                     <strong>{{ categoria.nombre }}</strong>
                 </td>
                 <td>
-                    <a href="{% url 'disciplinas:socios_inscriptos_categoria' categoria.pk %}" class="button is-small is-link" title="Ver inscriptos">
+                    <a href="{% url 'disciplinas:socios_inscriptos_categoria' categoria.pk %}" class="button is-small is-info" title="Ver inscriptos">
                         <span class="icon is-small"><i class="fas fa-list"></i></span>
                         <span>{{ categoria.cantidad_inscriptos }} Socios inscriptos</span>
                     </a>

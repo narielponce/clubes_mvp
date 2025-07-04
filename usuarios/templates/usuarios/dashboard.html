@@ -3,18 +3,6 @@
 
 {% block title %}Dashboard{% endblock %}
 
-{% block sidebar_menu %}
-    {% if rol == 'Coordinador' %}
-        {% include 'includes/sidebar_menu_coordinador.html' with request=request %}
-    {% elif rol == 'Tesoreria' %}
-        {% include 'includes/sidebar_menu_tesorero.html' with request=request %}
-    {% elif rol == 'Administrador' %}
-        {% include 'includes/sidebar_menu.html' with request=request %}
-    {% else %}
-        {% include 'includes/sidebar_menu.html' with request=request %}
-    {% endif %}
-{% endblock %}
-
 {% block content %}
 <div class="container">
     <h1 class="title">Dashboard</h1>

@@ -30,7 +30,41 @@
                     <p class="card-header-title">Estado de Cuenta</p>
                 </header>
                 <div class="card-content">
-                    <p>Por implementar...</p>
+                    <div class="content">
+                        <p>Consulta tu estado de cuenta actual, deudas pendientes e historial de pagos.</p>
+                        <a href="{% url 'finanzas:estado_cuenta' %}" class="button is-primary">
+                            <span class="icon">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </span>
+                            <span>Ver Estado de Cuenta</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="column is-4">
+            <div class="card">
+                <header class="card-header">
+                    <p class="card-header-title">Accesos Rápidos</p>
+                </header>
+                <div class="card-content">
+                    <div class="content">
+                        <div class="buttons is-vertical is-fullwidth">
+                            <a href="{% url 'finanzas:estado_cuenta' %}" class="button is-info is-fullwidth">
+                                <span class="icon">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </span>
+                                <span>Estado de Cuenta</span>
+                            </a>
+                            <a href="{% url 'usuarios:mi_perfil' %}" class="button is-light is-fullwidth">
+                                <span class="icon">
+                                    <i class="fas fa-user-edit"></i>
+                                </span>
+                                <span>Editar Perfil</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
