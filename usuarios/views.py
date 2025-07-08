@@ -15,6 +15,7 @@ from socios.models import Socio
 from disciplinas.models import Disciplina, Categoria, Inscripcion
 from finanzas.models import Cuenta, Deuda, Transaccion
 from django.utils import timezone
+import json # Import json
 
 def is_admin(user):
     return user.groups.filter(name='Administrador').exists()
@@ -567,4 +568,29 @@ def puede_ver_reportes(user):
 @login_required
 @user_passes_test(puede_ver_reportes)
 def reportes_view(request):
-    return render(request, 'reportes.html')
+    # Obtener el mes y año actual para el período por defecto
+    hoy = timezone.now()
+    primer_dia_mes = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    # Calcular ingresos
+    ingresos_qs = Transaccion.objects.filter(
+        tipo='INGRESO',
+        fecha__gte=primer_dia_mes,
+        fecha__lte=hoy
+    )
+    total_ingresos = ingresos_qs.aggregate(Sum('monto'))['monto__sum'] or 0
+    
+    # Calcular egresos
+    egresos_qs = Transaccion.objects.filter(
+        tipo='EGRESO',
+        fecha__gte=primer_dia_mes,
+        fecha__lte=hoy
+    )
+    total_egresos = egresos_qs.aggregate(Sum('monto'))['monto__sum'] or 0
+    
+    context = {
+        'total_ingresos': json.dumps(float(total_ingresos)), # Convert to float and then JSON string
+        'total_egresos': json.dumps(float(total_egresos)),   # Convert to float and then JSON string
+        'periodo_reporte': f'{primer_dia_mes.strftime('%d/%m/%Y')} - {hoy.strftime('%d/%m/%Y')}',
+    }
+    return render(request, 'reportes.html', context)
