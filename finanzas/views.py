@@ -15,6 +15,10 @@ from socios.models import Socio, TipoSocio
 from disciplinas.models import Disciplina, Categoria
 from usuarios.decorators import tesorero_required
 from django.db.models import Q
+from django.utils import timezone
+from django.db.models import Sum
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import Group # Ensure Group is imported
 
 # Vistas de Cuentas
 @login_required
@@ -449,8 +453,10 @@ def get_categorias_disciplina(request):
     return JsonResponse([], safe=False)
 
 @login_required
-@tesorero_required
 def lista_socios_finanzas(request):
+    if not request.user.groups.filter(name__in=['Administrador', 'Tesoreria', 'Comision']).exists():
+        messages.error(request, 'No tienes permisos para acceder a esta funcionalidad.')
+        return redirect('usuarios:dashboard')
     query = request.GET.get('q', '').strip()
     tipo = request.GET.get('tipo', '')
     estado = request.GET.get('estado', '')
@@ -661,3 +667,11 @@ def lista_estados_cuenta(request):
     }
     
     return render(request, 'finanzas/lista_estados_cuenta.html', context)
+
+def puede_ver_reportes(user):
+    return user.is_authenticated and user.groups.filter(name__in=['Administrador', 'Tesoreria', 'Comision']).exists()
+
+@login_required
+@user_passes_test(puede_ver_reportes)
+def reportes_view(request):
+    return render(request, 'reportes.html')

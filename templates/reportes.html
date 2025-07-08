@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Reportes - Club Los Amigos{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="title">Reportes del Club</h1>
+    <div class="columns">
+        <div class="column is-12">
+            <div class="box">
+                <h2 class="title is-4">Resumen financiero</h2>
+                <div class="columns">
+                    <div class="column is-6">
+                        <h3 class="subtitle is-6">Ingresos/Egresos</h3>
+                        <p>Mostrar los ingresos (cuotas sociales, alquileres, eventos) y los gastos (sueldos, servicios, mantenimientos) durante un período específico.</p>
+                        <div class="notification is-light">[Gráfica o tabla de ingresos/egresos aquí]</div>
+                    </div>
+                    <div class="column is-6">
+                        <h3 class="subtitle is-6">Cuentas por cobrar</h3>
+                        <p>Lista de socios que adeudan cuotas, detallando el monto y la antigüedad de la deuda.</p>
+                        <div class="notification is-light">[Tabla de cuentas por cobrar aquí]</div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <h2 class="title is-4">Área de socios</h2>
+                <h3 class="subtitle is-6">Padrón de socios</h3>
+                <p>Listado actualizado de todos los socios con su estado.</p>
+                <div class="notification is-light">[Tabla de padrón de socios aquí]</div>
+            </div>
+            <div class="box">
+                <h2 class="title is-4">Área operativa</h2>
+                <div class="columns">
+                    <div class="column is-6">
+                        <h3 class="subtitle is-6">Instalaciones</h3>
+                        <p>Mostrar qué tan utilizadas están las canchas, salones o quinchos.</p>
+                        <div class="notification is-light">[Gráfica o tabla de uso de instalaciones aquí]</div>
+                    </div>
+                    <div class="column is-6">
+                        <h3 class="subtitle is-6">Actividades</h3>
+                        <p>Detallar el número de inscriptos en cada una de las actividades que ofrece el club.</p>
+                        <div class="notification is-light">[Tabla de inscriptos por actividad aquí]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

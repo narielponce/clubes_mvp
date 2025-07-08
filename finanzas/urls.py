@@ -37,4 +37,5 @@ urlpatterns = [
     # API
     path('api/categorias-disciplina/', views.get_categorias_disciplina, name='get_categorias_disciplina'),
     path('socios/', views.lista_socios_finanzas, name='lista_socios_finanzas'),
+
 ] 

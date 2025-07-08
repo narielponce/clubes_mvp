@@ -1,5 +1,15 @@
-{% extends 'usuarios/base_tesorero.html' %}
+{% extends 'base.html' %}
 {% load static %}
+
+{% block sidebar_menu %}
+    {% if user.groups.all.0.name == 'Comision' %}
+        {% include 'includes/sidebar_menu_comision.html' %}
+    {% elif user.groups.all.0.name == 'Tesoreria' %}
+        {% include 'includes/sidebar_menu_tesorero.html' %}
+    {% elif user.groups.all.0.name == 'Administrador' %}
+        {% include 'includes/sidebar_menu.html' %}
+    {% endif %}
+{% endblock %}
 
 {% block title %}Listado de Socios - Finanzas{% endblock %}
 

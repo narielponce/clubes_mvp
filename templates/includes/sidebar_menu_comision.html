@@ -17,9 +17,15 @@
         </a>
     </li>
     <li>
-        <a href="{% url 'finanzas:lista_estados_cuenta' %}" {% if '/finanzas/estados-cuenta/' in request.path %}class="is-active"{% endif %}>
-            <span class="icon"><i class="fas fa-file-invoice-dollar"></i></span>
-            <span>Estados de Cuenta</span>
+        <a href="{% url 'finanzas:lista_socios_finanzas' %}" {% if '/finanzas/socios/' in request.path %}class="is-active"{% endif %}>
+            <span class="icon"><i class="fas fa-users"></i></span>
+            <span>Estado de socios</span>
+        </a>
+    </li>
+    <li>
+        <a href="#">
+            <span class="icon"><i class="fas fa-chart-bar"></i></span>
+            <span>Reportes</span>
         </a>
     </li>
     <li>

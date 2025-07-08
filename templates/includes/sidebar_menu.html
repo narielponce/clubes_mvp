@@ -40,12 +40,10 @@
             <span>Disciplinas</span>
         </a>
     </li>
-    <li>
-        <a href="{% url 'finanzas:lista_estados_cuenta' %}" {% if '/finanzas/estados-cuenta/' in request.path %}class="is-active"{% endif %}>
-            <span class="icon"><i class="fas fa-file-invoice-dollar"></i></span>
-            <span>Estados de Cuenta</span>
-        </a>
-    </li>
+    
+    {% if user.is_authenticated and user.groups.all.0.name in 'Administrador,Tesoreria,Comision' %}
+    <li><a href="{% url 'finanzas:lista_socios_finanzas' %}"><span class="icon"><i class="fas fa-users"></i></span> Estado de socios</a></li>
+    {% endif %}
     <li>
         <a href="#">
             <span class="icon"><i class="fas fa-book"></i></span>

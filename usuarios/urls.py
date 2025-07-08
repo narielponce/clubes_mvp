@@ -30,6 +30,7 @@ urlpatterns = [
     path('grupos/crear/', views.crear_grupo, name='crear_grupo'),
     path('grupos/<int:pk>/editar/', views.editar_grupo, name='editar_grupo'),
     path('grupos/<int:pk>/eliminar/', views.eliminar_grupo, name='eliminar_grupo'),
-    
 
+    # Reportes
+    path('reportes/', views.reportes_view, name='reportes'),
 ]

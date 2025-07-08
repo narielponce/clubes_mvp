@@ -128,12 +128,29 @@ def dashboard(request):
     elif 'Comision' in grupos:
         template = 'usuarios/dash_comision.html'
         rol = 'Comision'
-        
+        # Agregar estadísticas para el dashboard de comisión
+        total_socios = Socio.objects.filter(perfil_usuario__estado_socio='ACTIVO', perfil_usuario__usuario__is_active=True).count()
+        disciplinas_activas = Disciplina.objects.filter(activa=True).count()
+        deudas_pendientes = Deuda.objects.filter(estado__in=['PENDIENTE', 'VENCIDA']).count()
+        inicio_mes = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        ingresos_mes = Transaccion.objects.filter(
+            tipo='INGRESO',
+            fecha__gte=inicio_mes
+        ).aggregate(total=Sum('monto'))['total'] or 0
+        socios_recientes = Socio.objects.filter(
+            perfil_usuario__estado_socio='ACTIVO',
+            perfil_usuario__usuario__is_active=True
+        ).select_related('perfil_usuario__usuario', 'tipo_socio').order_by('-fecha_afiliacion')[:10]
         context = {
             'rol': rol,
             'es_socio': es_socio,
             'perfil': perfil,
             'socio': perfil.socio if es_socio else None,
+            'total_socios': total_socios,
+            'disciplinas_activas': disciplinas_activas,
+            'deudas_pendientes': deudas_pendientes,
+            'ingresos_mes': ingresos_mes,
+            'socios_recientes': socios_recientes,
         }
         return render(request, template, context)
     else:
@@ -469,7 +486,7 @@ def mi_perfil(request):
 def dashboard_tesorero(request):
     """Dashboard específico para tesoreros"""
     # Obtener estadísticas financieras
-    total_socios = Socio.objects.filter(esta_activo=True).count()
+    total_socios = Socio.objects.filter(perfil_usuario__estado_socio='ACTIVO', perfil_usuario__usuario__is_active=True).count()
     deudas_pendientes = Deuda.objects.filter(estado__in=['PENDIENTE', 'VENCIDA']).count()
     
     # Calcular ingresos del mes actual
@@ -509,7 +526,7 @@ def dashboard_tesorero(request):
 def dashboard_comision(request):
     """Dashboard específico para comisión"""
     # Obtener estadísticas generales
-    total_socios = Socio.objects.filter(esta_activo=True).count()
+    total_socios = Socio.objects.filter(perfil_usuario__estado_socio='ACTIVO', perfil_usuario__usuario__is_active=True).count()
     disciplinas_activas = Disciplina.objects.filter(activa=True).count()
     deudas_pendientes = Deuda.objects.filter(estado__in=['PENDIENTE', 'VENCIDA']).count()
     
@@ -522,7 +539,8 @@ def dashboard_comision(request):
     
     # Socios recientes (últimos 10)
     socios_recientes = Socio.objects.filter(
-        esta_activo=True
+        perfil_usuario__estado_socio='ACTIVO',
+        perfil_usuario__usuario__is_active=True
     ).select_related('perfil_usuario__usuario', 'tipo_socio').order_by('-fecha_afiliacion')[:10]
     
     # Verificar si el usuario también es socio
@@ -542,3 +560,11 @@ def dashboard_comision(request):
     }
     
     return render(request, 'usuarios/dash_comision.html', context)
+
+def puede_ver_reportes(user):
+    return user.is_authenticated and user.groups.filter(name__in=['Administrador', 'Tesoreria', 'Comision']).exists()
+
+@login_required
+@user_passes_test(puede_ver_reportes)
+def reportes_view(request):
+    return render(request, 'reportes.html')

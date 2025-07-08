@@ -29,6 +29,13 @@
     </div>
     {% endif %}
     
+    <div class="buttons mb-4">
+        <a href="{% url 'usuarios:reportes' %}" class="button is-warning">
+            <span class="icon"><i class="fas fa-chart-bar"></i></span>
+            <span>Ver Reportes</span>
+        </a>
+    </div>
+
     <div class="columns is-multiline">
         <div class="column is-3">
             <div class="box has-text-centered">
@@ -90,7 +97,7 @@
                                     </td>
                                     <td>{{ socio.fecha_afiliacion|date:"d/m/Y" }}</td>
                                     <td>
-                                        <a href="{% url 'finanzas:estado_cuenta' socio.id %}" class="button is-small is-info">
+                                        <a href="{% url 'finanzas:estado_cuenta_socio' socio.id %}" class="button is-small is-info">
                                             <span class="icon"><i class="fas fa-eye"></i></span>
                                             <span>Ver Estado</span>
                                         </a>
@@ -103,49 +110,6 @@
                 {% else %}
                     <p class="has-text-grey">No hay socios recientes.</p>
                 {% endif %}
-            </div>
-        </div>
-
-        <!-- Panel lateral -->
-        <div class="column is-4">
-            <!-- Acciones Rápidas -->
-            <div class="box">
-                <h3 class="title is-5">Acciones Rápidas</h3>
-                <div class="buttons">
-                    <a href="{% url 'finanzas:lista_estados_cuenta' %}" class="button is-info is-fullwidth">
-                        <span class="icon"><i class="fas fa-file-invoice-dollar"></i></span>
-                        <span>Estados de Cuenta</span>
-                    </a>
-                    <a href="{% url 'socios:lista_socios' %}" class="button is-primary is-fullwidth">
-                        <span class="icon"><i class="fas fa-users"></i></span>
-                        <span>Gestionar Socios</span>
-                    </a>
-                    <a href="{% url 'disciplinas:lista_disciplinas' %}" class="button is-success is-fullwidth">
-                        <span class="icon"><i class="fas fa-dumbbell"></i></span>
-                        <span>Disciplinas</span>
-                    </a>
-                    <a href="{% url 'usuarios:lista_usuarios' %}" class="button is-warning is-fullwidth">
-                        <span class="icon"><i class="fas fa-user-cog"></i></span>
-                        <span>Usuarios</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Acceso Directo -->
-            <div class="box mt-4">
-                <h3 class="title is-5">Acceso Directo</h3>
-                <div class="content">
-                    <ul>
-                        <li><a href="{% url 'finanzas:lista_estados_cuenta' %}">Estados de Cuenta</a></li>
-                        <li><a href="{% url 'socios:lista_socios' %}">Socios</a></li>
-                        <li><a href="{% url 'disciplinas:lista_disciplinas' %}">Disciplinas</a></li>
-                        <li><a href="{% url 'usuarios:lista_usuarios' %}">Usuarios</a></li>
-                        <li><a href="{% url 'finanzas:lista_deudas' %}">Deudas</a></li>
-                        {% if es_socio %}
-                        <li><a href="{% url 'finanzas:estado_cuenta' %}">Mi Estado de Cuenta</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
