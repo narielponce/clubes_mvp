@@ -23,7 +23,7 @@
         </a>
     </li>
     <li>
-        <a href="#">
+        <a href="{% url 'usuarios:reportes' %}" {% if request.path == '/usuarios/reportes/' %}class="is-active"{% endif %}>
             <span class="icon"><i class="fas fa-chart-bar"></i></span>
             <span>Reportes</span>
         </a>
