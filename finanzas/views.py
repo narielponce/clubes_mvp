@@ -675,3 +675,22 @@ def puede_ver_reportes(user):
 @user_passes_test(puede_ver_reportes)
 def reportes_view(request):
     return render(request, 'reportes.html')
+
+@login_required
+def reporte_financiero(request):
+    # Calculate total ingresos and egresos for the financial report
+    # This logic should mirror or be adapted from how it was calculated for reportes.html
+
+    # For demonstration, let's assume a fixed period or get it from request
+    # You might want to add filters for period_reporte in the future
+    periodo_reporte = "Anual (2023)" # Example: replace with dynamic calculation
+    
+    total_ingresos = Transaccion.objects.filter(tipo='INGRESO').aggregate(Sum('monto'))['monto__sum'] or 0
+    total_egresos = Transaccion.objects.filter(tipo='EGRESO').aggregate(Sum('monto'))['monto__sum'] or 0
+
+    context = {
+        'periodo_reporte': periodo_reporte,
+        'total_ingresos': total_ingresos,
+        'total_egresos': total_egresos,
+    }
+    return render(request, 'finanzas/reporte_financiero.html', context)

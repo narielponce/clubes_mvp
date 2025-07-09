@@ -2,44 +2,70 @@
 {% block title %}Reportes - Club Los Amigos{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="title">Reportes del Club</h1>
-    <div class="columns">
-        <div class="column is-12">
-            <div class="box">
-                <h2 class="title is-4">Resumen financiero</h2>
-                <div class="columns">
-                    <div class="column is-6">
-                        <h3 class="subtitle is-6">Ingresos/Egresos</h3>
-                        <p>Periodo: {{ periodo_reporte }}</p>
-                        <p>Total Ingresos: <strong>${{ total_ingresos|floatformat:2 }}</strong></p>
-                        <p>Total Egresos: <strong>${{ total_egresos|floatformat:2 }}</strong></p>
-                        <canvas id="ingresosEgresosChart"></canvas>
+    <h1 class="title mb-6">Reportes Varios</h1>
+    <div class="columns is-multiline">
+        <div class="column is-4">
+            <div class="card equal-height-card">
+                <div class="card-image">
+                    <figure class="image is-128x128">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3449/3449305.png" alt="Placeholder image">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-content">
+                            <p class="title is-4">Resumen financiero</p>
+                            <p class="subtitle is-6">Reporte detallado de ingresos y egresos</p>
+                        </div>
                     </div>
-                    <div class="column is-6">
-                        <h3 class="subtitle is-6">Cuentas por cobrar</h3>
-                        <p>Lista de socios que adeudan cuotas, detallando el monto y la antigüedad de la deuda.</p>
-                        <div class="notification is-light">[Tabla de cuentas por cobrar aquí]</div>
+                    <div class="content">
+                        Accede al reporte completo de ingresos, egresos y cuentas por cobrar. Ideal para una visión detallada de la salud financiera del club.
+                        <br>
+                        <a href="{% url 'finanzas:reporte_financiero' %}" class="button is-info is-fullwidth mt-3">Ver Reporte Financiero</a>
                     </div>
                 </div>
             </div>
-            <div class="box">
-                <h2 class="title is-4">Área de socios</h2>
-                <h3 class="subtitle is-6">Padrón de socios</h3>
-                <p>Listado actualizado de todos los socios con su estado.</p>
-                <div class="notification is-light">[Tabla de padrón de socios aquí]</div>
-            </div>
-            <div class="box">
-                <h2 class="title is-4">Área operativa</h2>
-                <div class="columns">
-                    <div class="column is-6">
-                        <h3 class="subtitle is-6">Instalaciones</h3>
-                        <p>Mostrar qué tan utilizadas están las canchas, salones o quinchos.</p>
-                        <div class="notification is-light">[Gráfica o tabla de uso de instalaciones aquí]</div>
+        </div>
+        <div class="column is-4">
+            <div class="card equal-height-card">
+                <div class="card-image">
+                    <figure class="image is-128x128">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Placeholder image">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-content">
+                            <p class="title is-4">Área de Socios</p>
+                            <p class="subtitle is-6">Gestiona y visualiza el padrón de socios</p>
+                        </div>
                     </div>
-                    <div class="column is-6">
-                        <h3 class="subtitle is-6">Actividades</h3>
-                        <p>Detallar el número de inscriptos en cada una de las actividades que ofrece el club.</p>
-                        <div class="notification is-light">[Tabla de inscriptos por actividad aquí]</div>
+                    <div class="content">
+                        Accede al listado completo de socios, actualiza sus estados y gestiona su información. Imprescindible para el control de la membresía del club.
+                        <br>
+                        <a href="#" class="button is-info is-fullwidth mt-3">Ver Reportes de Socios</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="column is-4">
+            <div class="card equal-height-card">
+                <div class="card-image">
+                    <figure class="image is-128x128">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2800/2800163.png" alt="Placeholder image">
+                    </figure>
+                </div>
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-content">
+                            <p class="title is-4">Área Operativa</p>
+                            <p class="subtitle is-6">Reportes de uso de instalaciones y actividades</p>
+                        </div>
+                    </div>
+                    <div class="content">
+                        Informes sobre la utilización de canchas y salones, así como el detalle de inscriptos en cada disciplina. Optimiza la gestión de recursos y actividades del club.
+                        <br>
+                        <a href="#" class="button is-info is-fullwidth mt-3">Ver Reporte Operativo</a>
                     </div>
                 </div>
             </div>
@@ -49,50 +75,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('ingresosEgresosChart').getContext('2d');
-        const totalIngresos = JSON.parse('{{ total_ingresos|escapejs }}');
-        const totalEgresos = JSON.parse('{{ total_egresos|escapejs }}');
-
-        const ingresosEgresosChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Ingresos', 'Egresos'],
-                datasets: [{
-                    label: 'Monto ($)',
-                    data: [totalIngresos, totalEgresos],
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.6)',
-                        'rgba(255, 99, 132, 0.6)'
-                    ],
-                    borderColor: [
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(255, 99, 132, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Monto ($)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'Ingresos vs Egresos'
-                    }
-                }
-            }
-        });
+        // Chart.js initialization for ingresosEgresosChart moved to new template
     });
 </script>
 {% endblock %} 

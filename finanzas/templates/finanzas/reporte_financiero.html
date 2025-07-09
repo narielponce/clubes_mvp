@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte Financiero - Club Los Amigos{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="title">Reporte Financiero</h1>
+    <div class="columns">
+        <div class="column is-12">
+            <div class="box">
+                <h2 class="title is-4">Resumen financiero</h2>
+                <div class="columns">
+                    <div class="column is-6">
+                        <h3 class="subtitle is-6">Ingresos/Egresos</h3>
+                        <p>Periodo: {{ periodo_reporte }}</p>
+                        <p>Total Ingresos: <strong>${{ total_ingresos|floatformat:2 }}</strong></p>
+                        <p>Total Egresos: <strong>${{ total_egresos|floatformat:2 }}</strong></p>
+                        <canvas id="ingresosEgresosChart"></canvas>
+                    </div>
+                    <div class="column is-6">
+                        <h3 class="subtitle is-6">Cuentas por cobrar</h3>
+                        <p>Lista de socios que adeudan cuotas, detallando el monto y la antigüedad de la deuda.</p>
+                        <div class="notification is-light">[Tabla de cuentas por cobrar aquí]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column is-12 has-text-centered">
+            <a href="{% url 'usuarios:reportes' %}" class="button is-link is-light">Volver a Reportes</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('ingresosEgresosChart').getContext('2d');
+        const totalIngresos = JSON.parse('{{ total_ingresos|escapejs }}');
+        const totalEgresos = JSON.parse('{{ total_egresos|escapejs }}');
+
+        const ingresosEgresosChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Ingresos', 'Egresos'],
+                datasets: [{
+                    label: 'Monto ($)',
+                    data: [totalIngresos, totalEgresos],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(255, 99, 132, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Monto ($)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Ingresos vs Egresos'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 
