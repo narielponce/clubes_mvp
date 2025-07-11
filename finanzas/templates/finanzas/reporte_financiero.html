@@ -7,19 +7,48 @@
     <div class="columns">
         <div class="column is-12">
             <div class="box">
-                <h2 class="title is-4">Resumen financiero</h2>
                 <div class="columns">
                     <div class="column is-6">
-                        <h3 class="subtitle is-6">Ingresos/Egresos</h3>
+                        <h2 class="title is-4">Ingresos/Egresos</h2>
                         <p>Periodo: {{ periodo_reporte }}</p>
                         <p>Total Ingresos: <strong>${{ total_ingresos|floatformat:2 }}</strong></p>
                         <p>Total Egresos: <strong>${{ total_egresos|floatformat:2 }}</strong></p>
                         <canvas id="ingresosEgresosChart"></canvas>
                     </div>
                     <div class="column is-6">
-                        <h3 class="subtitle is-6">Cuentas por cobrar</h3>
+                        <h2 class="title is-4">Cuentas por cobrar</h2>
                         <p>Lista de socios que adeudan cuotas, detallando el monto y la antigüedad de la deuda.</p>
-                        <div class="notification is-light">[Tabla de cuentas por cobrar aquí]</div>
+                        {% if socios_deudores %}
+                        <div class="table-container">
+                            <table class="table is-striped is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>Socio</th>
+                                        <th>Monto adeudado</th>
+                                        <th>Antigüedad (días)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in socios_deudores %}
+                                    <tr>
+                                        <td>{{ s.nombre_completo }}</td>
+                                        <td>${{ s.monto_total|floatformat:2 }}</td>
+                                        <td>{{ s.antiguedad }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% if total_deudores > 5 %}
+                            <div class="has-text-right">
+                                <a href="{% url 'finanzas:cuentas_por_cobrar' %}" class="button is-info is-small">
+                                    Ver más
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="notification is-light">No hay cuentas por cobrar.</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

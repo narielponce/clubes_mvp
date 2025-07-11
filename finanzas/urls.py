@@ -38,5 +38,6 @@ urlpatterns = [
     path('api/categorias-disciplina/', views.get_categorias_disciplina, name='get_categorias_disciplina'),
     path('socios/', views.lista_socios_finanzas, name='lista_socios_finanzas'),
     path('reporte_financiero/', views.reporte_financiero, name='reporte_financiero'),
+    path('cuentas_por_cobrar/', views.cuentas_por_cobrar_placeholder, name='cuentas_por_cobrar'),
 
 ] 

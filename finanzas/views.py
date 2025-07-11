@@ -19,6 +19,8 @@ from django.utils import timezone
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group # Ensure Group is imported
+from django.db import models # Added for Min and F
+from django.http import HttpResponse
 
 # Vistas de Cuentas
 @login_required
@@ -688,9 +690,39 @@ def reporte_financiero(request):
     total_ingresos = Transaccion.objects.filter(tipo='INGRESO').aggregate(Sum('monto'))['monto__sum'] or 0
     total_egresos = Transaccion.objects.filter(tipo='EGRESO').aggregate(Sum('monto'))['monto__sum'] or 0
 
+    # --- NUEVO: Cuentas por cobrar (socios deudores) ---
+    deudas_pendientes = Deuda.objects.filter(estado__in=['PENDIENTE', 'VENCIDA'])
+    socios_deudores = (
+        deudas_pendientes
+        .values('socio')
+        .annotate(
+            nombre=models.F('socio__perfil_usuario__usuario__first_name'),
+            apellido=models.F('socio__perfil_usuario__usuario__last_name'),
+            monto_total=models.Sum('monto_total'),
+            fecha_mas_antigua=models.Min('fecha_generacion')
+        )
+        .order_by('-monto_total')
+    )
+    # Calcular antigüedad en días
+    for s in socios_deudores:
+        if s['fecha_mas_antigua']:
+            s['antiguedad'] = (date.today() - s['fecha_mas_antigua']).days
+        else:
+            s['antiguedad'] = None
+        s['nombre_completo'] = f"{s['nombre']} {s['apellido']}".strip()
+
+    socios_deudores = list(socios_deudores)
+    total_deudores = len(socios_deudores)
+    socios_deudores = socios_deudores[:5]
+
     context = {
         'periodo_reporte': periodo_reporte,
         'total_ingresos': total_ingresos,
         'total_egresos': total_egresos,
+        'socios_deudores': socios_deudores,
+        'total_deudores': total_deudores,
     }
     return render(request, 'finanzas/reporte_financiero.html', context)
+
+def cuentas_por_cobrar_placeholder(request):
+    return HttpResponse("Vista de detalle de cuentas por cobrar próximamente.")

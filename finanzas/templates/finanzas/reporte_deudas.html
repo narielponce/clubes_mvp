@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Deudas - Club Los Amigos{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="title">Reporte de Cuotas Adeudadas</h1>
+    <div class="columns">
+        <div class="column is-12">
+            <div class="box">
+                <h2 class="title is-4">Socios con Deuda</h2>
+                <table class="table is-striped is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>Socio</th>
+                            <th>Monto Adeudado</th>
+                            <th>Antigüedad de la Deuda</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Loop through socios_con_deuda here -->
+                        <tr>
+                            <td>[Nombre del Socio]</td>
+                            <td>$[Monto]</td>
+                            <td>[Antigüedad] días</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="columns">
+        <div class="column is-12 has-text-centered">
+            <a href="#" class="button is-link is-light">Volver a Reportes</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 
